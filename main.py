@@ -10,6 +10,7 @@ FPS = 30
 
 # Initialize Pygame
 pygame.init()
+pygame.mixer.init()
 window = pygame.display.set_mode((winWidth, winHeight))
 # Set the caption
 pygame.display.set_caption("Rhythm Game")
@@ -19,13 +20,13 @@ clock = pygame.time.Clock()
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
-
 #set up asset directory
 game_dir = os.path.dirname(__file__)
 # relative path to assets dir
 assets_dir = os.path.join(game_dir, "assets")
 # relative path to image dir
 graphics_dir = os.path.join(assets_dir, "graphics")
+snd_dir = os.path.join(assets_dir, "music")
 
 def gameExit():
     pygame.quit()
@@ -47,9 +48,8 @@ class Pad(pygame.sprite.Sprite):
         self.rect.x = 120
         self.rect.y = 120
     
-    def update(self):
-        print("prob animation")
-
+    #def update(self):
+        #print("prob animation")
 
 class Note(pygame.sprite.Sprite):
     def __init__(self):
@@ -66,7 +66,7 @@ class Note(pygame.sprite.Sprite):
         self.rect.y = 900
         
         # random speed along the y-axis
-        self.speed_y = random.randrange(7, 10)
+        self.speed_y = 10
         
         # check timer for last update to move
         self.move_update = pygame.time.get_ticks()
@@ -88,6 +88,69 @@ class Note(pygame.sprite.Sprite):
         if self.rect.top > winHeight + 15:
             self.kill()
 
+#manages the song
+class Conductor():
+    def __init__(self):
+        self.bmp = 70   #beats per min
+        self.index= 0  #traverses through note structure
+        self.finishLine=120 #perfect end position of note
+        self.hitOffset =50 #largest accepted offset for hit
+        self.secPerBeat= 0 #duration of a beat in seconds
+        self.offset = 0  #offset of song beginning
+        self.songPosition = 0 #curr position of song in sec
+        self.songPositionBeats = 0 #curr position of song in beats
+        self.songTimeStart = 0 #time the song starts
+        self.notesPerMeasure = 2 #how many notes displayed per measure
+        pygame.mixer.music.load(os.path.join(snd_dir,"music.wav")) #load the song
+        self.notes = [1,3,5.5,7,8]   #struct to hold notes
+        self.notesShown =[]           #to keep track of notes shown
+
+    def start(self):
+        self.secPerBeat = 60/self.bmp
+        #hopefully clock keeps up  
+        self.clockSongTime = pygame.time.get_ticks()
+        pygame.mixer.music.play()
+
+    def update(self):
+        note_sprites.clear
+        #position in sec    1000 ticks per sec
+        self.songPosition= (pygame.time.get_ticks()-self.songTimeStart)/1000
+        #current position in beats
+        self.songPositionBeats= self.songPosition/self.secPerBeat
+        #print(self.songPositionBeats)
+        #check if there are notes left and check if the next note has reached its beat 
+        #(accounting for multiple displayed)
+        if(self.index<len(self.notes) and self.notes[self.index]<self.songPositionBeats+self.notesPerMeasure):
+            #make a note
+            note = Note()
+            self.notesShown.append(note)
+            #increment idx
+            self.index= self.index+1
+        if(len(self.notesShown)>0):
+            #grab current note
+            currNote= self.notesShown[0]
+            #update all the notes  might have to do loop for this one maybe
+            #note_sprites.update()
+            if currNote.rect.y<= self.finishLine - self.hitOffset:
+                self.notesShown.pop(0)
+                print("miss")
+        #this is so that the list Notesshown can determine which sprites are being drawn
+        for obj in self.notesShown:
+                note_sprites.add(obj)
+    
+    #maybe a handle input method for each track
+    def handleInput(self, key):
+        #if there are notes present,
+        if len(self.notes)>0:
+            #find how far note is from desired line
+            offset= abs(self.notesShown[0].rect.y - self.finishLine)
+            print(self.notesShown)
+            #check if it is close enough
+            if(offset<=self.hitOffset):
+                print("hit")
+                #this is not updating for some reason
+                self.notesShown.pop(0)
+                print(self.notesShown)
 
 
 #SETTING BG
@@ -97,27 +160,34 @@ bg_img = pygame.image.load(os.path.join(graphics_dir, "forest.jpg")).convert()
 bg_rect = bg_img.get_rect()
 note_img= pygame.image.load(os.path.join(graphics_dir, "note.png")).convert()
 pad_img= pygame.image.load(os.path.join(graphics_dir, "square.png")).convert()
+pygame.mixer.music.load(os.path.join(snd_dir,"music.wav"))
+pygame.mixer.music.set_volume(1)
 
 
 # game sprite group
 game_sprites = pygame.sprite.Group()
+note_sprites = pygame.sprite.Group()
 # create player object
 x=120
 for i in range(4):
     pad = Pad()
-    note =Note()
+    #note =Note()
     pad.rect.x=x
-    note.rect.x=x
+    #note.rect.x=x
     # add sprite to game's sprite group
     game_sprites.add(pad)
-    game_sprites.add(note)
+    #game_sprites.add(note)
 
     x=x+180
 
 
+# play background music
+pygame.mixer.music.play(loops=-1)
+conductor = Conductor()
 
 # Set the game loop
 running = True
+conductorStarted = False
 
 while running:
     clock.tick(FPS)
@@ -139,19 +209,29 @@ while running:
                 leftDown = True
             if event.key == pygame.K_RIGHT:
                 rightDown = True
+            if event.key == pygame.K_d:
+                conductor.handleInput("d")
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT:
                 leftDown = False
             if event.key == pygame.K_RIGHT:
                 rightDown = False
 
+    if not conductorStarted:
+        conductor.start()
+        conductorStarted=True
+    else:
+        conductor.update()
+
     #update
     game_sprites.update()
+    note_sprites.update()
 
     #draw
     #background
     window.blit(bg_img, bg_rect)
     game_sprites.draw(window)
+    note_sprites.draw(window)
     #updates all screen w/ no parameter
     pygame.display.update()
 
