@@ -6,7 +6,7 @@ import random
 # Set the screen dimensions
 winWidth = 1600
 winHeight = 900
-FPS = 30
+FPS = 60
 
 # Initialize Pygame
 pygame.init()
@@ -112,7 +112,6 @@ class Conductor():
         pygame.mixer.music.play()
 
     def update(self):
-        note_sprites.clear
         #position in sec    1000 ticks per sec
         self.songPosition= (pygame.time.get_ticks()-self.songTimeStart)/1000
         #current position in beats
@@ -124,6 +123,7 @@ class Conductor():
             #make a note
             note = Note()
             self.notesShown.append(note)
+            note_sprites.add(note)
             #increment idx
             self.index= self.index+1
         if(len(self.notesShown)>0):
@@ -133,10 +133,14 @@ class Conductor():
             #note_sprites.update()
             if currNote.rect.y<= self.finishLine - self.hitOffset:
                 self.notesShown.pop(0)
+                currNote.kill()
                 print("miss")
+        for visibleNote in self.notesShown:
+            visibleNote.update()
+
         #this is so that the list Notesshown can determine which sprites are being drawn
-        for obj in self.notesShown:
-                note_sprites.add(obj)
+        #for obj in self.notesShown:
+        #        note_sprites.add(obj)
     
     #maybe a handle input method for each track
     def handleInput(self, key):
@@ -148,7 +152,8 @@ class Conductor():
             #check if it is close enough
             if(offset<=self.hitOffset):
                 print("hit")
-                #this is not updating for some reason
+                #kill the sprite and remove it from the shown queue
+                self.notesShown[0].kill()
                 self.notesShown.pop(0)
                 print(self.notesShown)
 
@@ -225,7 +230,7 @@ while running:
 
     #update
     game_sprites.update()
-    note_sprites.update()
+    #note_sprites.update()
 
     #draw
     #background
