@@ -1,6 +1,6 @@
 **TO DO**
 
--note movement based on song position
+~~-note movement based on song position~~
 
 -data struct for song data/beatmap and interpreter- maybe json file?
 

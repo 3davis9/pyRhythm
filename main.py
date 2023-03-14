@@ -89,7 +89,7 @@ class Note(pygame.sprite.Sprite,):
 #manages the song
 class Conductor():
     def __init__(self):
-        self.bmp = 80   #beats per min
+        self.bmp = 70   #beats per min
         self.index= 0  #traverses through note structure
         self.finishLine=120 #perfect end position of note
         self.hitOffset =50 #largest accepted offset for hit
@@ -100,7 +100,7 @@ class Conductor():
         self.songTimeStart = 0 #time the song starts
         self.beatsinAdvance = 4 #how many beats before finish line
         pygame.mixer.music.load(os.path.join(snd_dir,"music.wav")) #load the song
-        self.notes = [4,4.5,5,5.5,6,7,8,9]   #struct to hold notes
+        self.notes = [4,5,6,6.5,8,10]   #struct to hold notes
         self.notesShown =[]           #to keep track of notes shown
 
     def start(self):
