@@ -36,7 +36,7 @@ def gameExit():
 class Pad(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image_original = pygame.transform.scale(pad_img, (120, 80))
+        self.image_original = pygame.transform.scale(pad_img, (120, 40))
         # set colour key for original image
         self.image_original.set_colorkey(BLACK)
         # set copy image for sprite rendering
@@ -52,7 +52,7 @@ class Pad(pygame.sprite.Sprite):
 class Note(pygame.sprite.Sprite):
     def __init__(self, beat, xpos):
         pygame.sprite.Sprite.__init__(self)
-        self.image_original = pygame.transform.scale(note_img, (120, 80))
+        self.image_original = pygame.transform.scale(note_img, (120, 40))
         # set colour key for original image
         self.image_original.set_colorkey(BLACK)
         # set copy image for sprite rendering
@@ -80,7 +80,7 @@ class Note(pygame.sprite.Sprite):
 #manages the song
 class Conductor():
     def __init__(self):
-        self.bmp = 70   #beats per min
+        self.bmp = 120   #beats per min
         self.finishLine=120 #perfect end position of note
         self.hitOffset =50 #largest accepted offset for hit
         self.secPerBeat= 0 #duration of a beat in seconds
@@ -94,15 +94,15 @@ class Conductor():
         self.notesShownD =[]             #queue to keep track of notes shown
         self.indexD= 0  #traverses through note structure
 
-        self.notesF= [4,4.5,6,7,8,9,10]
+        self.notesF= [6,7]
         self.notesShownF = []
         self.indexF =0 
 
-        self.notesJ =[5,6,7,10.5]
+        self.notesJ =[8,9,10]
         self.notesShownJ =[]
         self.indexJ =0
 
-        self.notesK= [4,5,6,6.5,7.6,7.7,7.8,7.9]
+        self.notesK= [8,9,10]
         self.notesShownK = []
         self.indexK=0
 
