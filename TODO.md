@@ -1,5 +1,7 @@
 **TO DO**
 
+--upload the main menu shit--
+
 ~~-note movement based on song position~~
 
 -data struct for song data/beatmap and interpreter- maybe json file?
@@ -13,3 +15,5 @@
 -score counter
 
 -art for monster, knight, and background
+
+-characters moving to beat

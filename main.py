@@ -19,6 +19,9 @@ clock = pygame.time.Clock()
 #set common color
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+GREEN  = (124, 252, 0)
+RED = (255, 0, 0)
+
 
 #set up asset directory
 game_dir = os.path.dirname(__file__)
@@ -27,6 +30,11 @@ assets_dir = os.path.join(game_dir, "assets")
 # relative path to image dir
 graphics_dir = os.path.join(assets_dir, "graphics")
 snd_dir = os.path.join(assets_dir, "music")
+
+# load pad images
+pad_img = pygame.image.load(os.path.join(graphics_dir, "square.png")).convert()
+green_pad_img = pygame.image.load(os.path.join(graphics_dir, "Green.png")).convert()
+red_pad_img = pygame.image.load(os.path.join(graphics_dir, "red.png")).convert()
 
 def gameExit():
     pygame.quit()
@@ -45,9 +53,11 @@ class Pad(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = 120
         self.rect.y = 120
+        # set pad to original image
+        self.image = self.image_original.copy()
     
     #def update(self):
-        #print("prob animation")
+     #   self.image = self.image_original.copy()
 
 class Note(pygame.sprite.Sprite):
     def __init__(self, beat, xpos):
@@ -76,6 +86,14 @@ class Note(pygame.sprite.Sprite):
         #die at top
         if self.rect.top > winHeight + 15:
             self.kill()
+
+        #check for pad collision
+        #if self.rect.colliderect(pad.rect):
+                #set pad image to green
+                #pad.image = pygame.transform.scale(green_pad_img, (120, 40))
+                #set pad to red
+                #pad.image = pygame.transform.scale(red_pad_img, (120, 40))
+
 
 #manages the song
 class Conductor():
@@ -140,6 +158,7 @@ class Conductor():
             if currNote.rect.y<= self.finishLine - self.hitOffset:
                 self.notesShownD.pop(0)
                 print("miss")
+                pad.image = pygame.transform.scale(red_pad_img, (120, 40))
 
         #UPDATE F
         #check if there are notes left in the queue and check if the next note has reached the beat 
@@ -161,6 +180,7 @@ class Conductor():
             if currNote.rect.y<= self.finishLine - self.hitOffset:
                 self.notesShownF.pop(0)
                 print("miss")
+                pad.image = pygame.transform.scale(red_pad_img, (120, 40))
         
         #UPDATE J
         #check if there are notes left in the queue and check if the next note has reached the beat 
@@ -181,6 +201,7 @@ class Conductor():
             #if the current note has passed finish line and offset, delete
             if currNote.rect.y<= self.finishLine - self.hitOffset:
                 self.notesShownJ.pop(0)
+                pad.image = pygame.transform.scale(red_pad_img, (120, 40))
                 print("miss")
 
         #UPDATE K
@@ -203,6 +224,7 @@ class Conductor():
             if currNote.rect.y<= self.finishLine - self.hitOffset:
                 self.notesShownK.pop(0)
                 print("miss")
+                pad.image = pygame.transform.scale(red_pad_img, (120, 40))
 
     
     #maybe a handle input method for each track
@@ -214,6 +236,7 @@ class Conductor():
             #check if it is close enough
             if(offset<=self.hitOffset):
                 print("hit")
+                pad1.image = pygame.transform.scale(green_pad_img, (120, 40))
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownD.pop(0)
                 toKill.kill()
@@ -226,7 +249,8 @@ class Conductor():
             #check if it is close enough
             if(offset<=self.hitOffset):
                 print("hit")
-                #kill the sprite and remove it from the shown queue
+                pad.image = pygame.transform.scale(green_pad_img, (120, 40))
+               #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownF.pop(0)
                 toKill.kill()
 
@@ -238,6 +262,7 @@ class Conductor():
             #check if it is close enough
             if(offset<=self.hitOffset):
                 print("hit")
+                pad.image = pygame.transform.scale(green_pad_img, (120, 40))
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownJ.pop(0)
                 toKill.kill()
@@ -250,6 +275,7 @@ class Conductor():
             #check if it is close enough
             if(offset<=self.hitOffset):
                 print("hit")
+                pad.image = pygame.transform.scale(green_pad_img, (120, 40))
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownK.pop(0)
                 toKill.kill()
