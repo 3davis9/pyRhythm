@@ -116,11 +116,11 @@ class Conductor():
         self.notesShownF = []
         self.indexF =0 
 
-        self.notesJ =[8,9,10]
+        self.notesJ =[8,9,10,11,12,13,14,15]
         self.notesShownJ =[]
         self.indexJ =0
 
-        self.notesK= [8,9,10]
+        self.notesK= [8,9,10,11,12,13,14,15,16,17,18]
         self.notesShownK = []
         self.indexK=0
 
@@ -236,7 +236,7 @@ class Conductor():
             #check if it is close enough
             if(offset<=self.hitOffset):
                 print("hit")
-                pad1.image = pygame.transform.scale(green_pad_img, (120, 40))
+                pad.image = pygame.transform.scale(green_pad_img, (120, 40))
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownD.pop(0)
                 toKill.kill()
