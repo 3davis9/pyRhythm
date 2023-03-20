@@ -8,8 +8,12 @@
 
 -menu screen, ability to select level
 
--popup text for hits and misses
+-popup text for hits and misses (possibly a hit and miss method to handle game events based on such)
+
+-more variation than hit or miss (ex. good, excelent)
 
 -score counter
 
--art for monster, knight, and background
+-health bar for monster
+
+-art for monster, knight, and background (working on this -aja)
