@@ -27,6 +27,7 @@ assets_dir = os.path.join(game_dir, "assets")
 # relative path to image dir
 graphics_dir = os.path.join(assets_dir, "graphics")
 snd_dir = os.path.join(assets_dir, "music")
+font_dir = os.path.join(assets_dir, "fonts")
 
 def gameExit():
     pygame.quit()
@@ -43,11 +44,43 @@ class Pad(pygame.sprite.Sprite):
         self.image = self.image_original.copy()
         # specify bounding rect for sprite
         self.rect = self.image.get_rect()
-        self.rect.x = 120
+        self.rect.x = 110
         self.rect.y = 120
+        self.changetime =0
     
-    #def update(self):
-        #print("prob animation")
+    def updateSkin(self, name):
+        self.image = pygame.transform.scale(name, (120, 40))
+        self.changetime = pygame.time.get_ticks()
+
+    def update(self):
+        currtime= pygame.time.get_ticks()
+        if currtime-self.changetime > 250:
+            self.image = self.image_original
+    
+class hittext(pygame.sprite.Sprite):
+    def __init__(self,x):
+        pygame.sprite.Sprite.__init__(self)
+        self.image_original = pygame.transform.scale(hit_img, (120, 40))
+        # set colour key for original image
+        self.image_original.set_colorkey(BLACK)
+        # set copy image for sprite rendering
+        self.image = self.image_original.copy()
+        # specify bounding rect for sprite
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = 95
+        self.velocity= 2
+        self.alpha = 255
+        self.fade = False
+
+    def update(self):
+        self.rect.y-=self.velocity
+        self.alpha = max(0, self.alpha-5)  # alpha should never be < 0.
+        self.image = self.image_original.copy()
+        self.image.fill((255, 255, 255, self.alpha), special_flags=pygame.BLEND_RGBA_MULT)
+        if self.alpha <= 0:  # Kill the sprite when the alpha is <= 0.
+          self.kill()
+
 
 class Note(pygame.sprite.Sprite):
     def __init__(self, beat, xpos):
@@ -106,7 +139,18 @@ class Conductor():
         self.notesShownK = []
         self.indexK=0
 
+        self.padArray=[]
+
     def start(self):
+        #create ending pads to draw
+        x=110
+        for i in range(4):
+            pad = Pad()
+            pad.rect.x=x
+            # add sprite to game's sprite group
+            game_sprites.add(pad)
+            self.padArray.append(pad)
+            x=x+155
         self.secPerBeat = 60/self.bmp
         #hopefully clock keeps up  
         #record time song starts
@@ -125,7 +169,7 @@ class Conductor():
         if(self.indexD<len(self.notesD) and self.notesD[self.indexD]<self.songPositionBeats+self.beatsinAdvance):
             #make a note
             #giving it the beat in the notes list
-            note = Note(self.notesD[self.indexD],120)
+            note = Note(self.notesD[self.indexD],110)
             #put it in queue to keep track of what is playable
             self.notesShownD.append(note)
             #adding to sprite group for updating and drawing
@@ -139,6 +183,7 @@ class Conductor():
             #if the current note has passed finish line and offset, delete
             if currNote.rect.y<= self.finishLine - self.hitOffset:
                 self.notesShownD.pop(0)
+                self.missHandler("D")
                 print("miss")
 
         #UPDATE F
@@ -146,7 +191,7 @@ class Conductor():
         if(self.indexF<len(self.notesF) and self.notesF[self.indexF]<self.songPositionBeats+self.beatsinAdvance):
             #make a note
             #giving it the beat in the notes list
-            note = Note(self.notesF[self.indexF],300)
+            note = Note(self.notesF[self.indexF],265)
             #put it in queue to keep track of what is playable
             self.notesShownF.append(note)
             #adding to sprite group for updating and drawing
@@ -160,6 +205,7 @@ class Conductor():
             #if the current note has passed finish line and offset, delete
             if currNote.rect.y<= self.finishLine - self.hitOffset:
                 self.notesShownF.pop(0)
+                self.missHandler("F")
                 print("miss")
         
         #UPDATE J
@@ -167,7 +213,7 @@ class Conductor():
         if(self.indexJ<len(self.notesJ) and self.notesJ[self.indexJ]<self.songPositionBeats+self.beatsinAdvance):
             #make a note
             #giving it the beat in the notes list
-            note = Note(self.notesJ[self.indexJ],480)
+            note = Note(self.notesJ[self.indexJ],420)
             #put it in queue to keep track of what is playable
             self.notesShownJ.append(note)
             #adding to sprite group for updating and drawing
@@ -181,6 +227,7 @@ class Conductor():
             #if the current note has passed finish line and offset, delete
             if currNote.rect.y<= self.finishLine - self.hitOffset:
                 self.notesShownJ.pop(0)
+                self.missHandler("J")
                 print("miss")
 
         #UPDATE K
@@ -188,7 +235,7 @@ class Conductor():
         if(self.indexK<len(self.notesK) and self.notesK[self.indexK]<self.songPositionBeats+self.beatsinAdvance):
             #make a note
             #giving it the beat in the notes list
-            note = Note(self.notesK[self.indexK],660)
+            note = Note(self.notesK[self.indexK],575)
             #put it in queue to keep track of what is playable
             self.notesShownK.append(note)
             #adding to sprite group for updating and drawing
@@ -202,6 +249,7 @@ class Conductor():
             #if the current note has passed finish line and offset, delete
             if currNote.rect.y<= self.finishLine - self.hitOffset:
                 self.notesShownK.pop(0)
+                self.missHandler("K")
                 print("miss")
 
     
@@ -214,6 +262,7 @@ class Conductor():
             #check if it is close enough
             if(offset<=self.hitOffset):
                 print("hit")
+                self.hitHandler("D")
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownD.pop(0)
                 toKill.kill()
@@ -226,6 +275,7 @@ class Conductor():
             #check if it is close enough
             if(offset<=self.hitOffset):
                 print("hit")
+                self.hitHandler("F")
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownF.pop(0)
                 toKill.kill()
@@ -238,6 +288,7 @@ class Conductor():
             #check if it is close enough
             if(offset<=self.hitOffset):
                 print("hit")
+                self.hitHandler("J")
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownJ.pop(0)
                 toKill.kill()
@@ -250,9 +301,38 @@ class Conductor():
             #check if it is close enough
             if(offset<=self.hitOffset):
                 print("hit")
+                self.hitHandler("K")
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownK.pop(0)
                 toKill.kill()
+
+    def missHandler(self, note):
+        if note=="D":
+            self.padArray[0].updateSkin(padmiss_img)
+        if note=="F":
+            self.padArray[1].updateSkin(padmiss_img)
+        if note=="J":
+            self.padArray[2].updateSkin(padmiss_img)
+        if note=="K":
+            self.padArray[3].updateSkin(padmiss_img)
+    
+    def hitHandler(self, note):
+        if note=="D":
+            self.padArray[0].updateSkin(padhit_img)
+            hit=hittext(110)
+            game_sprites.add(hit)
+        if note=="F":
+            self.padArray[1].updateSkin(padhit_img)
+            hit=hittext(265)
+            game_sprites.add(hit)
+        if note=="J":
+            self.padArray[2].updateSkin(padhit_img)
+            hit=hittext(420)
+            game_sprites.add(hit)
+        if note=="K":
+            self.padArray[3].updateSkin(padhit_img)
+            hit=hittext(575)
+            game_sprites.add(hit)
 
 font_match = pygame.font.match_font('arial')
 # text output and render function - draw to game window
@@ -270,11 +350,15 @@ def textRender(surface, text, size, x, y):
 
 #SETTING BG
 # load graphics/images for the game
-bg_img = pygame.image.load(os.path.join(graphics_dir, "forest.jpg")).convert()
+bg_img = pygame.image.load(os.path.join(graphics_dir, "forestdivide.png")).convert()
 # add rect for bg - helps locate background
 bg_rect = bg_img.get_rect()
 note_img= pygame.image.load(os.path.join(graphics_dir, "note.png")).convert()
-pad_img= pygame.image.load(os.path.join(graphics_dir, "square.png")).convert()
+pad_img= pygame.image.load(os.path.join(graphics_dir, "pad.png")).convert()
+padmiss_img= pygame.image.load(os.path.join(graphics_dir, "padmiss.png")).convert()
+padhit_img= pygame.image.load(os.path.join(graphics_dir, "padhit.png")).convert()
+miss_img= pygame.image.load(os.path.join(graphics_dir, "miss.png")).convert()
+hit_img= pygame.image.load(os.path.join(graphics_dir, "hit.png")).convert()
 #loading music
 pygame.mixer.music.load(os.path.join(snd_dir,"music.wav"))
 pygame.mixer.music.set_volume(1)
@@ -282,15 +366,6 @@ pygame.mixer.music.set_volume(1)
 # create sprite groups
 game_sprites = pygame.sprite.Group()
 note_sprites = pygame.sprite.Group()
-
-#create ending pads to draw
-x=120
-for i in range(4):
-    pad = Pad()
-    pad.rect.x=x
-    # add sprite to game's sprite group
-    game_sprites.add(pad)
-    x=x+180
 
 
 # play background music
@@ -364,7 +439,6 @@ while running:
         timeSinceLastAction=0
     textRender(window, str(beat), 100, 500,500)
 
-        
     game_sprites.draw(window)
     note_sprites.draw(window)
     
