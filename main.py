@@ -33,7 +33,6 @@ def gameExit():
     pygame.quit()
     sys.exit()
 
-
 class Pad(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -46,21 +45,33 @@ class Pad(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = 110
         self.rect.y = 120
-        self.changetime =0
-    
-    def updateSkin(self, name):
-        self.image = pygame.transform.scale(name, (120, 40))
-        self.changetime = pygame.time.get_ticks()
-
-    def update(self):
-        currtime= pygame.time.get_ticks()
-        if currtime-self.changetime > 250:
-            self.image = self.image_original
-    
-class hittext(pygame.sprite.Sprite):
-    def __init__(self,x):
+        #(this is to reposition the pad during hits and misses)
+   
+class padBorder(pygame.sprite.Sprite):
+    def __init__(self,x,y,img):
         pygame.sprite.Sprite.__init__(self)
-        self.image_original = pygame.transform.scale(hit_img, (120, 40))
+        self.image_original = pygame.transform.scale(img, (140, 60))
+        # set colour key for original image
+        self.image_original.set_colorkey(BLACK)
+        # set copy image for sprite rendering
+        self.image = self.image_original.copy()
+        # specify bounding rect for sprite
+        self.rect = self.image.get_rect()
+        self.rect.x = x-10
+        self.rect.y = y-10
+        self.alpha = 255
+        self.alpha_change = 5
+    def update(self):
+        #fade out
+        self.alpha -= self.alpha_change
+        self.image.set_alpha(self.alpha)
+        if(self.alpha<=0):
+            self.kill()
+
+class movingtext(pygame.sprite.Sprite):
+    def __init__(self,x,img):
+        pygame.sprite.Sprite.__init__(self)
+        self.image_original = pygame.transform.scale(img, (120, 40))
         # set colour key for original image
         self.image_original.set_colorkey(BLACK)
         # set copy image for sprite rendering
@@ -69,17 +80,19 @@ class hittext(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = 95
-        self.velocity= 2
+        self.velocity= .5
         self.alpha = 255
+        self.alpha_change = 5
         self.fade = False
-
     def update(self):
         self.rect.y-=self.velocity
-        self.alpha = max(0, self.alpha-5)  # alpha should never be < 0.
-        self.image = self.image_original.copy()
-        self.image.fill((255, 255, 255, self.alpha), special_flags=pygame.BLEND_RGBA_MULT)
-        if self.alpha <= 0:  # Kill the sprite when the alpha is <= 0.
-          self.kill()
+        self.alpha -= self.alpha_change
+        #this would be for fading in and out
+        #if not 0 <= self.alpha <= 255:
+        #    self.alpha_change *= -1
+        self.image.set_alpha(self.alpha)
+        if(self.alpha<=0):
+            self.kill()
 
 
 class Note(pygame.sprite.Sprite):
@@ -308,31 +321,47 @@ class Conductor():
 
     def missHandler(self, note):
         if note=="D":
-            self.padArray[0].updateSkin(padmiss_img)
+            miss=movingtext(110,miss_img)
+            game_sprites.add(miss)
+            missborder= padBorder(self.padArray[0].rect.x,self.padArray[0].rect.y,padmiss_img)
+            game_sprites.add(missborder)
         if note=="F":
-            self.padArray[1].updateSkin(padmiss_img)
+            miss=movingtext(265,miss_img)
+            game_sprites.add(miss)
+            missborder= padBorder(self.padArray[1].rect.x,self.padArray[1].rect.y,padmiss_img)
+            game_sprites.add(missborder)
         if note=="J":
-            self.padArray[2].updateSkin(padmiss_img)
+            miss=movingtext(420,miss_img)
+            game_sprites.add(miss)
+            missborder= padBorder(self.padArray[2].rect.x,self.padArray[2].rect.y,padmiss_img)
+            game_sprites.add(missborder)
         if note=="K":
-            self.padArray[3].updateSkin(padmiss_img)
+            miss=movingtext(575,miss_img)
+            game_sprites.add(miss)
+            missborder= padBorder(self.padArray[3].rect.x,self.padArray[3].rect.y,padmiss_img)
+            game_sprites.add(missborder)
     
     def hitHandler(self, note):
         if note=="D":
-            self.padArray[0].updateSkin(padhit_img)
-            hit=hittext(110)
+            hit=movingtext(110,hit_img)
             game_sprites.add(hit)
+            hitborder= padBorder(self.padArray[0].rect.x,self.padArray[0].rect.y,padhit_img)
+            game_sprites.add(hitborder)
         if note=="F":
-            self.padArray[1].updateSkin(padhit_img)
-            hit=hittext(265)
+            hit=movingtext(265,hit_img)
             game_sprites.add(hit)
+            hitborder= padBorder(self.padArray[1].rect.x,self.padArray[1].rect.y,padhit_img)
+            game_sprites.add(hitborder)
         if note=="J":
-            self.padArray[2].updateSkin(padhit_img)
-            hit=hittext(420)
+            hit=movingtext(420,hit_img)
             game_sprites.add(hit)
+            hitborder= padBorder(self.padArray[2].rect.x,self.padArray[2].rect.y,padhit_img)
+            game_sprites.add(hitborder)
         if note=="K":
-            self.padArray[3].updateSkin(padhit_img)
-            hit=hittext(575)
+            hit=movingtext(575,hit_img)
             game_sprites.add(hit)
+            hitborder= padBorder(self.padArray[3].rect.x,self.padArray[3].rect.y,padhit_img)
+            game_sprites.add(hitborder)
 
 font_match = pygame.font.match_font('arial')
 # text output and render function - draw to game window
