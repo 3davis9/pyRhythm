@@ -34,9 +34,9 @@ def gameExit():
     sys.exit()
 
 class Pad(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self,skin):
         pygame.sprite.Sprite.__init__(self)
-        self.image_original = pygame.transform.scale(pad_img, (120, 40))
+        self.image_original = pygame.transform.scale(skin, (120, 40))
         # set colour key for original image
         self.image_original.set_colorkey(BLACK)
         # set copy image for sprite rendering
@@ -45,7 +45,15 @@ class Pad(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = 110
         self.rect.y = 120
-        #(this is to reposition the pad during hits and misses)
+        self.changetime =0
+    def flashSkin(self):
+        self.image = pygame.transform.scale(padflash_img, (120, 40))
+        self.changetime = pygame.time.get_ticks()
+    def update(self):
+        currtime= pygame.time.get_ticks()
+        if currtime-self.changetime > 250:
+            self.image = self.image_original
+
    
 class padBorder(pygame.sprite.Sprite):
     def __init__(self,x,y,img):
@@ -96,9 +104,9 @@ class movingtext(pygame.sprite.Sprite):
 
 
 class Note(pygame.sprite.Sprite):
-    def __init__(self, beat, xpos):
+    def __init__(self, beat, xpos, img):
         pygame.sprite.Sprite.__init__(self)
-        self.image_original = pygame.transform.scale(note_img, (120, 40))
+        self.image_original = pygame.transform.scale(img, (120, 40))
         # set colour key for original image
         self.image_original.set_colorkey(BLACK)
         # set copy image for sprite rendering
@@ -136,6 +144,9 @@ class Conductor():
         self.songTimeStart = 0 #time the song starts
         self.beatsinAdvance = 4 #how many shown beats before finish line
         pygame.mixer.music.load(os.path.join(snd_dir,"music.wav")) #load the song
+        self.noteSkins= [noteblue_img, noteoran_img, notepurp_img, noteyell_img]
+        self.padSkins = [padblue_img, padoran_img, padpurp_img, padyell_img]
+
         self.notesD = [4,5,6,6.5,8,10]   #struct to hold notes
         self.notesShownD =[]             #queue to keep track of notes shown
         self.indexD= 0  #traverses through note structure
@@ -156,9 +167,11 @@ class Conductor():
 
     def start(self):
         #create ending pads to draw
-        x=110
+        #array of skins to iterate through
+        
+        x=130
         for i in range(4):
-            pad = Pad()
+            pad = Pad(self.padSkins[i])
             pad.rect.x=x
             # add sprite to game's sprite group
             game_sprites.add(pad)
@@ -182,7 +195,7 @@ class Conductor():
         if(self.indexD<len(self.notesD) and self.notesD[self.indexD]<self.songPositionBeats+self.beatsinAdvance):
             #make a note
             #giving it the beat in the notes list
-            note = Note(self.notesD[self.indexD],110)
+            note = Note(self.notesD[self.indexD],self.padArray[0].rect.x, self.noteSkins[0])
             #put it in queue to keep track of what is playable
             self.notesShownD.append(note)
             #adding to sprite group for updating and drawing
@@ -197,14 +210,13 @@ class Conductor():
             if currNote.rect.y<= self.finishLine - self.hitOffset:
                 self.notesShownD.pop(0)
                 self.missHandler("D")
-                print("miss")
 
         #UPDATE F
         #check if there are notes left in the queue and check if the next note has reached the beat 
         if(self.indexF<len(self.notesF) and self.notesF[self.indexF]<self.songPositionBeats+self.beatsinAdvance):
             #make a note
             #giving it the beat in the notes list
-            note = Note(self.notesF[self.indexF],265)
+            note = Note(self.notesF[self.indexF],self.padArray[1].rect.x,self.noteSkins[1])
             #put it in queue to keep track of what is playable
             self.notesShownF.append(note)
             #adding to sprite group for updating and drawing
@@ -219,14 +231,13 @@ class Conductor():
             if currNote.rect.y<= self.finishLine - self.hitOffset:
                 self.notesShownF.pop(0)
                 self.missHandler("F")
-                print("miss")
         
         #UPDATE J
         #check if there are notes left in the queue and check if the next note has reached the beat 
         if(self.indexJ<len(self.notesJ) and self.notesJ[self.indexJ]<self.songPositionBeats+self.beatsinAdvance):
             #make a note
             #giving it the beat in the notes list
-            note = Note(self.notesJ[self.indexJ],420)
+            note = Note(self.notesJ[self.indexJ],self.padArray[2].rect.x,self.noteSkins[2])
             #put it in queue to keep track of what is playable
             self.notesShownJ.append(note)
             #adding to sprite group for updating and drawing
@@ -241,14 +252,13 @@ class Conductor():
             if currNote.rect.y<= self.finishLine - self.hitOffset:
                 self.notesShownJ.pop(0)
                 self.missHandler("J")
-                print("miss")
 
         #UPDATE K
         #check if there are notes left in the queue and check if the next note has reached the beat 
         if(self.indexK<len(self.notesK) and self.notesK[self.indexK]<self.songPositionBeats+self.beatsinAdvance):
             #make a note
             #giving it the beat in the notes list
-            note = Note(self.notesK[self.indexK],575)
+            note = Note(self.notesK[self.indexK],self.padArray[3].rect.x,self.noteSkins[3])
             #put it in queue to keep track of what is playable
             self.notesShownK.append(note)
             #adding to sprite group for updating and drawing
@@ -263,7 +273,6 @@ class Conductor():
             if currNote.rect.y<= self.finishLine - self.hitOffset:
                 self.notesShownK.pop(0)
                 self.missHandler("K")
-                print("miss")
 
     
     #maybe a handle input method for each track
@@ -274,7 +283,6 @@ class Conductor():
             offset= abs(self.notesShownD[0].rect.y - self.finishLine)
             #check if it is close enough
             if(offset<=self.hitOffset):
-                print("hit")
                 self.hitHandler("D")
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownD.pop(0)
@@ -287,7 +295,6 @@ class Conductor():
             offset= abs(self.notesShownF[0].rect.y - self.finishLine)
             #check if it is close enough
             if(offset<=self.hitOffset):
-                print("hit")
                 self.hitHandler("F")
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownF.pop(0)
@@ -300,7 +307,6 @@ class Conductor():
             offset= abs(self.notesShownJ[0].rect.y - self.finishLine)
             #check if it is close enough
             if(offset<=self.hitOffset):
-                print("hit")
                 self.hitHandler("J")
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownJ.pop(0)
@@ -313,55 +319,63 @@ class Conductor():
             offset= abs(self.notesShownK[0].rect.y - self.finishLine)
             #check if it is close enough
             if(offset<=self.hitOffset):
-                print("hit")
                 self.hitHandler("K")
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownK.pop(0)
                 toKill.kill()
 
+    #miss and hit handlers manage the animations missing and hitting notes
     def missHandler(self, note):
         if note=="D":
-            miss=movingtext(110,miss_img)
+            #the positions of flashing borders and text depend on the array that holds the pads
+            #access the positions of the pads using the array
+            miss=movingtext(self.padArray[0].rect.x,miss_img)
             game_sprites.add(miss)
             missborder= padBorder(self.padArray[0].rect.x,self.padArray[0].rect.y,padmiss_img)
             game_sprites.add(missborder)
         if note=="F":
-            miss=movingtext(265,miss_img)
+            miss=movingtext(self.padArray[1].rect.x,miss_img)
             game_sprites.add(miss)
             missborder= padBorder(self.padArray[1].rect.x,self.padArray[1].rect.y,padmiss_img)
             game_sprites.add(missborder)
         if note=="J":
-            miss=movingtext(420,miss_img)
+            miss=movingtext(self.padArray[2].rect.x,miss_img)
             game_sprites.add(miss)
             missborder= padBorder(self.padArray[2].rect.x,self.padArray[2].rect.y,padmiss_img)
             game_sprites.add(missborder)
         if note=="K":
-            miss=movingtext(575,miss_img)
+            miss=movingtext(self.padArray[3].rect.x,miss_img)
             game_sprites.add(miss)
             missborder= padBorder(self.padArray[3].rect.x,self.padArray[3].rect.y,padmiss_img)
             game_sprites.add(missborder)
     
     def hitHandler(self, note):
         if note=="D":
-            hit=movingtext(110,hit_img)
+            hit=movingtext(self.padArray[0].rect.x,hit_img)
             game_sprites.add(hit)
             hitborder= padBorder(self.padArray[0].rect.x,self.padArray[0].rect.y,padhit_img)
             game_sprites.add(hitborder)
+            self.padArray[0].flashSkin()
         if note=="F":
-            hit=movingtext(265,hit_img)
+            hit=movingtext(self.padArray[1].rect.x,hit_img)
             game_sprites.add(hit)
             hitborder= padBorder(self.padArray[1].rect.x,self.padArray[1].rect.y,padhit_img)
             game_sprites.add(hitborder)
+            self.padArray[1].flashSkin()
         if note=="J":
-            hit=movingtext(420,hit_img)
+            hit=movingtext(self.padArray[2].rect.x,hit_img)
             game_sprites.add(hit)
             hitborder= padBorder(self.padArray[2].rect.x,self.padArray[2].rect.y,padhit_img)
             game_sprites.add(hitborder)
+            self.padArray[2].flashSkin()
+
         if note=="K":
-            hit=movingtext(575,hit_img)
+            hit=movingtext(self.padArray[3].rect.x,hit_img)
             game_sprites.add(hit)
             hitborder= padBorder(self.padArray[3].rect.x,self.padArray[3].rect.y,padhit_img)
             game_sprites.add(hitborder)
+            self.padArray[3].flashSkin()
+
 
 font_match = pygame.font.match_font('arial')
 # text output and render function - draw to game window
@@ -384,10 +398,21 @@ bg_img = pygame.image.load(os.path.join(graphics_dir, "forestdivide.png")).conve
 bg_rect = bg_img.get_rect()
 note_img= pygame.image.load(os.path.join(graphics_dir, "note.png")).convert()
 pad_img= pygame.image.load(os.path.join(graphics_dir, "pad.png")).convert()
+padflash_img= pygame.image.load(os.path.join(graphics_dir, "padflash.png")).convert_alpha()
 padmiss_img= pygame.image.load(os.path.join(graphics_dir, "padmiss.png")).convert()
 padhit_img= pygame.image.load(os.path.join(graphics_dir, "padhit.png")).convert()
 miss_img= pygame.image.load(os.path.join(graphics_dir, "miss.png")).convert()
 hit_img= pygame.image.load(os.path.join(graphics_dir, "hit.png")).convert()
+sword_img= pygame.image.load(os.path.join(graphics_dir, "sword.png")).convert_alpha()
+sword_rect = sword_img.get_rect()
+padblue_img = pygame.image.load(os.path.join(graphics_dir, "padblue.png")).convert()
+padoran_img = pygame.image.load(os.path.join(graphics_dir, "padoran.png")).convert()
+padpurp_img = pygame.image.load(os.path.join(graphics_dir, "padpurp.png")).convert()
+padyell_img = pygame.image.load(os.path.join(graphics_dir, "padyell.png")).convert()
+noteblue_img = pygame.image.load(os.path.join(graphics_dir, "noteblue.png")).convert()
+noteoran_img = pygame.image.load(os.path.join(graphics_dir, "noteoran.png")).convert()
+notepurp_img = pygame.image.load(os.path.join(graphics_dir, "notepurp.png")).convert()
+noteyell_img = pygame.image.load(os.path.join(graphics_dir, "noteyell.png")).convert()
 #loading music
 pygame.mixer.music.load(os.path.join(snd_dir,"music.wav"))
 pygame.mixer.music.set_volume(1)
@@ -460,6 +485,8 @@ while running:
     #draw
     #background
     window.blit(bg_img, bg_rect)
+    window.blit(sword_img, (10,40))
+
 
     #prints beats in time
     timeSinceLastAction= timeSinceLastAction + timesincelasttick
