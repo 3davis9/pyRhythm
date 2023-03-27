@@ -27,6 +27,7 @@ assets_dir = os.path.join(game_dir, "assets")
 # relative path to image dir
 graphics_dir = os.path.join(assets_dir, "graphics")
 knight_dir =os.path.join(graphics_dir, "knight")
+monster_dir =os.path.join(graphics_dir, "monster")
 snd_dir = os.path.join(assets_dir, "music")
 font_dir = os.path.join(assets_dir, "fonts")
 
@@ -377,8 +378,7 @@ class Conductor():
 class Knight(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.images= [knight1, knight2, knight3, knight4, knight5, knight6, knight7, knight8, knight9, knight10,
-                      knight10, knight9, knight8, knight7, knight6, knight5, knight4, knight3, knight2, knight1,]
+        self.images= knightSkins
         self.rect= self.images[0].get_rect()
         self.rect.x = 800
         self.rect.y = 220
@@ -387,7 +387,25 @@ class Knight(pygame.sprite.Sprite):
         self.animation_time = 50
         self.current_time = 0
         self.notReverse=True
-    def update(self, time):
+    def update(self):
+        self.index+=1
+        if(self.index>=len(self.images)): 
+            self.index=0 
+        self.image = self.images[self.index]
+
+class Monster(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.images= monsterSkins
+        self.rect= self.images[0].get_rect()
+        self.rect.x = 1100
+        self.rect.y = 0
+        self.index=0
+        self.image=self.images[self.index]
+        self.animation_time = 50
+        self.current_time = 0
+        self.notReverse=True
+    def update(self):
         self.index+=1
         if(self.index>=len(self.images)): 
             self.index=0 
@@ -430,16 +448,14 @@ noteoran_img = pygame.image.load(os.path.join(graphics_dir, "noteoran.png")).con
 notepurp_img = pygame.image.load(os.path.join(graphics_dir, "notepurp.png")).convert()
 noteyell_img = pygame.image.load(os.path.join(graphics_dir, "noteyell.png")).convert()
 
-knight1 = pygame.image.load(os.path.join(knight_dir, "knight1.png")).convert_alpha()
-knight2 = pygame.image.load(os.path.join(knight_dir, "knight2.png")).convert_alpha()
-knight3 = pygame.image.load(os.path.join(knight_dir, "knight3.png")).convert_alpha()
-knight4 = pygame.image.load(os.path.join(knight_dir, "knight4.png")).convert_alpha()
-knight5 = pygame.image.load(os.path.join(knight_dir, "knight5.png")).convert_alpha()
-knight6 = pygame.image.load(os.path.join(knight_dir, "knight6.png")).convert_alpha()
-knight7 = pygame.image.load(os.path.join(knight_dir, "knight7.png")).convert_alpha()
-knight8 = pygame.image.load(os.path.join(knight_dir, "knight8.png")).convert_alpha()
-knight9 = pygame.image.load(os.path.join(knight_dir, "knight9.png")).convert_alpha()
-knight10 = pygame.image.load(os.path.join(knight_dir, "knight10.png")).convert_alpha()
+knightSkins=[]
+for i in range(10):
+    knightSkins.append(pygame.image.load(os.path.join(knight_dir, "knight"+str(i+1)+".png")).convert_alpha())
+for i in reversed(range(10)):
+    knightSkins.append(pygame.image.load(os.path.join(knight_dir, "knight"+str(i+1)+".png")).convert_alpha())
+monsterSkins=[]
+for i in range(11):
+    monsterSkins.append(pygame.image.load(os.path.join(monster_dir, "monster"+str(i+1)+".png")).convert_alpha())
 
 #loading music
 pygame.mixer.music.load(os.path.join(snd_dir,"music.wav"))
@@ -448,7 +464,8 @@ pygame.mixer.music.set_volume(1)
 # create sprite groups
 game_sprites = pygame.sprite.Group()
 note_sprites = pygame.sprite.Group()
-timedgroup= pygame.sprite.Group()
+knightgroup= pygame.sprite.Group()
+monstergroup=pygame.sprite.Group()
 
 # play background music
 pygame.mixer.music.play(loops=-1)
@@ -460,6 +477,7 @@ conductorStarted = False
 #variables for beat counter
 timeSinceLastAction =0
 timeSinceLastKnightFrame=0
+timeSinceLastMonsterFrame=0
 beat=0
 
 # Set the game loop
@@ -504,8 +522,10 @@ while running:
     #also start conductor immediately
     if not conductorStarted:
         conductor.start()
+        monster=Monster()
+        monstergroup.add(monster)
         knight=Knight()
-        timedgroup.add(knight)
+        knightgroup.add(knight)
         conductorStarted=True
     else:
         conductor.update()
@@ -527,18 +547,24 @@ while running:
     
     #animates knight in time hopefully
     timeSinceLastKnightFrame=timeSinceLastKnightFrame +timesincelasttick
-    secperFrame = (conductor.secPerBeat/(len(knight.images)))*1000
-    if(timeSinceLastKnightFrame/2>secperFrame):
-        timedgroup.update(timesincelasttick)
+    secperFrameK = (conductor.secPerBeat/(len(knight.images)))*1000
+    if(timeSinceLastKnightFrame/2>secperFrameK):
+        knightgroup.update()
         timeSinceLastKnightFrame =0
 
-        
+    timeSinceLastMonsterFrame=timeSinceLastMonsterFrame +timesincelasttick
+    secperFrameM = (conductor.secPerBeat/(len(monster.images)))*1000
+    if(timeSinceLastMonsterFrame/2>secperFrameM):
+        monstergroup.update()
+        print("update")
+        timeSinceLastMonsterFrame =0
         
     textRender(window, str(beat), 100, 500,500)
 
     game_sprites.draw(window)
     note_sprites.draw(window)
-    timedgroup.draw(window)
+    knightgroup.draw(window)
+    monstergroup.draw(window)
     
     #updates all screen w/ no parameter
     pygame.display.update()
