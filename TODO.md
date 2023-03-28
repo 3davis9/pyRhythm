@@ -10,9 +10,11 @@
 
 -more variation than hit or miss (ex. good, excelent)
 
--score counter
+-score counter(working on this -Anshul)
 
--health bar for monster
+-health bar for monster - Done
+
+- art for health bar - could use the same art as pads with different color and more width
 
 -~~art for monster, knight, and background~~ depleted health version of monster (working on this -aja)
 
