@@ -275,7 +275,7 @@ class Conductor():
 
     
     #maybe a handle input method for each track
-    def handleD(self):
+    def handleD(self, monster):
         #if there are notes present,
         if len(self.notesShownD)>0:
             #find how far note is from desired line
@@ -286,8 +286,10 @@ class Conductor():
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownD.pop(0)
                 toKill.kill()
+                monster.decrease_health(5)
 
-    def handleF(self):
+
+    def handleF(self, monster):
         #if there are notes present,
         if len(self.notesShownF)>0:
             #find how far note is from desired line
@@ -298,8 +300,9 @@ class Conductor():
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownF.pop(0)
                 toKill.kill()
+                monster.decrease_health(5)
 
-    def handleJ(self):
+    def handleJ(self, monster):
         #if there are notes present,
         if len(self.notesShownJ)>0:
             #find how far note is from desired line
@@ -310,8 +313,9 @@ class Conductor():
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownJ.pop(0)
                 toKill.kill()
+                monster.decrease_health(5)
 
-    def handleK(self):
+    def handleK(self, monster):
         #if there are notes present,
         if len(self.notesShownK)>0:
             #find how far note is from desired line
@@ -322,6 +326,7 @@ class Conductor():
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownK.pop(0)
                 toKill.kill()
+                monster.decrease_health(5)
 
     #miss and hit handlers manage the animations missing and hitting notes
     def missHandler(self, note):
@@ -405,11 +410,38 @@ class Monster(pygame.sprite.Sprite):
         self.animation_time = 50
         self.current_time = 0
         self.notReverse=True
+        self.max_health = 100
+        self.current_health = self.max_health
+
     def update(self):
         self.index+=1
         if(self.index>=len(self.images)): 
             self.index=0 
         self.image = self.images[self.index]
+
+
+    def draw_health_bar(self, surface):
+
+        health_bar_width = 200
+        health_bar_height = 40
+        health_ratio = self.current_health / self.max_health
+        health_bar_fill = health_bar_width * health_ratio
+
+        # Position the health bar above the monster sprite
+        health_bar_x = self.rect.x + (self.rect.width - health_bar_width) / 2
+        health_bar_y = self.rect.y
+
+
+        outline_rect = pygame.Rect(health_bar_x, health_bar_y, health_bar_width, health_bar_height)
+        fill_rect = pygame.Rect(health_bar_x, health_bar_y, health_bar_fill, health_bar_height)
+
+        pygame.draw.rect(surface, BLACK, outline_rect, 2)
+        pygame.draw.rect(surface, (255, 0, 0), fill_rect)
+
+    def decrease_health(self, amount):
+        self.current_health -= amount
+        if self.current_health < 0:
+            self.current_health = 0
 
 font_match = pygame.font.match_font('arial')
 # text output and render function - draw to game window
@@ -506,13 +538,13 @@ while running:
             if event.key == pygame.K_RIGHT:
                 rightDown = True
             if event.key == pygame.K_d:
-                conductor.handleD()
+                conductor.handleD(monster)
             if event.key == pygame.K_f:
-                conductor.handleF()
+                conductor.handleF(monster)
             if event.key == pygame.K_j:
-                conductor.handleJ()
+                conductor.handleJ(monster)
             if event.key == pygame.K_k:
-                conductor.handleK()
+                conductor.handleK(monster)
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT:
                 leftDown = False
@@ -566,6 +598,13 @@ while running:
     note_sprites.draw(window)
     knightgroup.draw(window)
     monstergroup.draw(window)
+    # draw health bar
+    for monster in monstergroup:
+        monster.draw_health_bar(window)
+
+
+
+
     
     #updates all screen w/ no parameter
     pygame.display.update()
