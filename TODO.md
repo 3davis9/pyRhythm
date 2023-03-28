@@ -1,14 +1,12 @@
 **TO DO**
 
-~~-note movement based on song position~~
-
 -data struct for song data/beatmap and interpreter- maybe json file?
 
-~~-implement 4 tracks. prob 3 more queues and all initialized notes go in the note sprite group~~
+-OR song and beatmap (at least hard-coded)
 
 -menu screen, ability to select level
 
--~~popup text for hits and misses (possibly a hit and miss method to handle game events based on such)~~
+-game over/game won screen
 
 -more variation than hit or miss (ex. good, excelent)
 
@@ -16,6 +14,13 @@
 
 -health bar for monster
 
--art for monster, knight, and ~~background~~ (working on this -aja)
+-~~art for monster, knight, and background~~ depleted health version of monster (working on this -aja)
 
--song and beatmap
+-cloud animations to signify damage being taken
+
+~~-note movement based on song position~~
+
+~~-implement 4 tracks. prob 3 more queues and all initialized notes go in the note sprite group~~
+
+-~~popup text for hits and misses (possibly a hit and miss method to handle game events based on such)~~
+

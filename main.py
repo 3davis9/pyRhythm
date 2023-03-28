@@ -146,19 +146,19 @@ class Conductor():
         self.noteSkins= [noteblue_img, noteoran_img, notepurp_img, noteyell_img]
         self.padSkins = [padblue_img, padoran_img, padpurp_img, padyell_img]
 
-        self.notesD = [4,5,6,6.5,8,10]   #struct to hold notes
+        self.notesD = [4,5,6,6.5,8,10,13,15]   #struct to hold notes
         self.notesShownD =[]             #queue to keep track of notes shown
         self.indexD= 0  #traverses through note structure
 
-        self.notesF= [6,7]
+        self.notesF= [6,7,9,1014,16]
         self.notesShownF = []
         self.indexF =0 
 
-        self.notesJ =[8,9,10]
+        self.notesJ =[8,9,10,17,19]
         self.notesShownJ =[]
         self.indexJ =0
 
-        self.notesK= [8,9,10]
+        self.notesK= [8,9,10,18,20]
         self.notesShownK = []
         self.indexK=0
 
@@ -456,6 +456,8 @@ for i in reversed(range(10)):
 monsterSkins=[]
 for i in range(11):
     monsterSkins.append(pygame.image.load(os.path.join(monster_dir, "monster"+str(i+1)+".png")).convert_alpha())
+for i in reversed(range(11)):
+    monsterSkins.append(pygame.image.load(os.path.join(monster_dir, "monster"+str(i+1)+".png")).convert_alpha())
 
 #loading music
 pygame.mixer.music.load(os.path.join(snd_dir,"music.wav"))
@@ -554,9 +556,8 @@ while running:
 
     timeSinceLastMonsterFrame=timeSinceLastMonsterFrame +timesincelasttick
     secperFrameM = (conductor.secPerBeat/(len(monster.images)))*1000
-    if(timeSinceLastMonsterFrame/2>secperFrameM):
+    if(timeSinceLastMonsterFrame/4>secperFrameM):
         monstergroup.update()
-        print("update")
         timeSinceLastMonsterFrame =0
         
     textRender(window, str(beat), 100, 500,500)
