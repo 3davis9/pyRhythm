@@ -18,7 +18,7 @@
 
 -~~art for monster, knight, and background~~ depleted health version of monster (working on this -aja)
 
--cloud animations to signify damage being taken
+-cloud animations to signify damage being taken, along with potential sound effect?
 
 ~~-note movement based on song position~~
 
