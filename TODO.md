@@ -12,9 +12,9 @@
 
 -score counter(working on this -Anshul)
 
--health bar for monster - Done
+-health bar for monster - Done (i moved health deplete call and cloud calls to the hit handler for now -aja)
 
-- art for health bar - could use the same art as pads with different color and more width
+- art for health bar - could use the same art as pads with different color and more width (i will make heart icon-aja)
 
 -~~art for monster, knight, and background~~ depleted health version of monster (working on this -aja)
 

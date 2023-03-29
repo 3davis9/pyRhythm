@@ -29,9 +29,9 @@ graphics_dir = os.path.join(assets_dir, "graphics")
 knight_dir =os.path.join(graphics_dir, "knight")
 monster_dir =os.path.join(graphics_dir, "monster")
 cloud_dir = os.path.join(graphics_dir, "cloud")
+ghost_dir = os.path.join(graphics_dir, "ghost")
 snd_dir = os.path.join(assets_dir, "music")
 font_dir = os.path.join(assets_dir, "fonts")
-ghost_dir = os.path.join(graphics_dir, "ghost")
 
 def gameExit():
     pygame.quit()
@@ -288,9 +288,6 @@ class Conductor():
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownD.pop(0)
                 toKill.kill()
-                monster.decrease_health(5)
-                #draw cloud
-                window.blit( cloud_img, (500, 500),)
 
 
     def handleF(self, monster):
@@ -304,8 +301,6 @@ class Conductor():
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownF.pop(0)
                 toKill.kill()
-                monster.decrease_health(5)
-                window.blit( cloud_img2, (500, 50),)
 
     def handleJ(self, monster):
         #if there are notes present,
@@ -318,8 +313,6 @@ class Conductor():
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownJ.pop(0)
                 toKill.kill()
-                monster.decrease_health(5)
-                window.blit( cloud_img3, (550,60),)
 
     def handleK(self, monster):
         #if there are notes present,
@@ -332,8 +325,6 @@ class Conductor():
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownK.pop(0)
                 toKill.kill()
-                monster.decrease_health(5)
-                window.blit( cloud_img4, (700, 700),)
 
     #miss and hit handlers manage the animations missing and hitting notes
     def missHandler(self, note):
@@ -361,24 +352,28 @@ class Conductor():
             game_sprites.add(missborder)
     
     def hitHandler(self, note):
+        monster.decrease_health(5)
         if note=="D":
             hit=movingtext(self.padArray[0].rect.x,hit_img)
             game_sprites.add(hit)
             hitborder= padBorder(self.padArray[0].rect.x,self.padArray[0].rect.y,padhit_img)
             game_sprites.add(hitborder)
             self.padArray[0].flashSkin()
+            window.blit( cloud_img, (500, 500),)
         if note=="F":
             hit=movingtext(self.padArray[1].rect.x,hit_img)
             game_sprites.add(hit)
             hitborder= padBorder(self.padArray[1].rect.x,self.padArray[1].rect.y,padhit_img)
             game_sprites.add(hitborder)
             self.padArray[1].flashSkin()
+            window.blit( cloud_img2, (500, 50),)
         if note=="J":
             hit=movingtext(self.padArray[2].rect.x,hit_img)
             game_sprites.add(hit)
             hitborder= padBorder(self.padArray[2].rect.x,self.padArray[2].rect.y,padhit_img)
             game_sprites.add(hitborder)
             self.padArray[2].flashSkin()
+            window.blit( cloud_img3, (550,60),)
 
         if note=="K":
             hit=movingtext(self.padArray[3].rect.x,hit_img)
@@ -386,6 +381,7 @@ class Conductor():
             hitborder= padBorder(self.padArray[3].rect.x,self.padArray[3].rect.y,padhit_img)
             game_sprites.add(hitborder)
             self.padArray[3].flashSkin()
+            window.blit( cloud_img4, (700, 700),)
 
 class Knight(pygame.sprite.Sprite):
     def __init__(self):
@@ -438,7 +434,6 @@ class Monster(pygame.sprite.Sprite):
         health_bar_x = self.rect.x + (self.rect.width - health_bar_width) / 2
         health_bar_y = self.rect.y
 
-
         outline_rect = pygame.Rect(health_bar_x, health_bar_y, health_bar_width, health_bar_height)
         fill_rect = pygame.Rect(health_bar_x, health_bar_y, health_bar_fill, health_bar_height)
 
@@ -453,7 +448,7 @@ class Monster(pygame.sprite.Sprite):
             window.blit(ghost_dir, (500,500))
 
 font_match = pygame.font.match_font('arial')
-# text output and render function - draw to game window
+# text output and render function- draw to game window
 def textRender(surface, text, size, x, y):
     # specify font for text render - uses found font and size of text
     font = pygame.font.Font(font_match, size)
@@ -498,13 +493,11 @@ for i in range(10):
     knightSkins.append(pygame.image.load(os.path.join(knight_dir, "knight"+str(i+1)+".png")).convert_alpha())
 for i in reversed(range(10)):
     knightSkins.append(pygame.image.load(os.path.join(knight_dir, "knight"+str(i+1)+".png")).convert_alpha())
-
 monsterSkins=[]
 for i in range(11):
     monsterSkins.append(pygame.image.load(os.path.join(monster_dir, "monster"+str(i+1)+".png")).convert_alpha())
 for i in reversed(range(11)):
     monsterSkins.append(pygame.image.load(os.path.join(monster_dir, "monster"+str(i+1)+".png")).convert_alpha())
-
 ghostSkins=[]
 for i in range(3):
     ghostSkins.append(pygame.image.load(os.path.join(ghost_dir, "ghost"+ str(i+1)+".png")).convert_alpha())
