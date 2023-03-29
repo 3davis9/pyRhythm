@@ -28,8 +28,10 @@ assets_dir = os.path.join(game_dir, "assets")
 graphics_dir = os.path.join(assets_dir, "graphics")
 knight_dir =os.path.join(graphics_dir, "knight")
 monster_dir =os.path.join(graphics_dir, "monster")
+cloud_dir = os.path.join(graphics_dir, "cloud")
 snd_dir = os.path.join(assets_dir, "music")
 font_dir = os.path.join(assets_dir, "fonts")
+ghost_dir = os.path.join(graphics_dir, "ghost")
 
 def gameExit():
     pygame.quit()
@@ -287,6 +289,8 @@ class Conductor():
                 toKill=self.notesShownD.pop(0)
                 toKill.kill()
                 monster.decrease_health(5)
+                #draw cloud
+                window.blit( cloud_img, (500, 500),)
 
 
     def handleF(self, monster):
@@ -301,6 +305,7 @@ class Conductor():
                 toKill=self.notesShownF.pop(0)
                 toKill.kill()
                 monster.decrease_health(5)
+                window.blit( cloud_img2, (500, 50),)
 
     def handleJ(self, monster):
         #if there are notes present,
@@ -314,6 +319,7 @@ class Conductor():
                 toKill=self.notesShownJ.pop(0)
                 toKill.kill()
                 monster.decrease_health(5)
+                window.blit( cloud_img3, (550,60),)
 
     def handleK(self, monster):
         #if there are notes present,
@@ -327,6 +333,7 @@ class Conductor():
                 toKill=self.notesShownK.pop(0)
                 toKill.kill()
                 monster.decrease_health(5)
+                window.blit( cloud_img4, (700, 700),)
 
     #miss and hit handlers manage the animations missing and hitting notes
     def missHandler(self, note):
@@ -442,6 +449,8 @@ class Monster(pygame.sprite.Sprite):
         self.current_health -= amount
         if self.current_health < 0:
             self.current_health = 0
+        if self.current_health == 0:
+            window.blit(ghost_dir, (500,500))
 
 font_match = pygame.font.match_font('arial')
 # text output and render function - draw to game window
@@ -479,17 +488,28 @@ noteblue_img = pygame.image.load(os.path.join(graphics_dir, "noteblue.png")).con
 noteoran_img = pygame.image.load(os.path.join(graphics_dir, "noteoran.png")).convert()
 notepurp_img = pygame.image.load(os.path.join(graphics_dir, "notepurp.png")).convert()
 noteyell_img = pygame.image.load(os.path.join(graphics_dir, "noteyell.png")).convert()
+cloud_img = pygame.image.load(os.path.join(cloud_dir, "cloud.png")).convert()
+cloud_img2 = pygame.image.load(os.path.join(cloud_dir, "cloud2.png")).convert()
+cloud_img3 = pygame.image.load(os.path.join(cloud_dir, "cloud3.png")).convert()
+cloud_img4 = pygame.image.load(os.path.join(cloud_dir, "cloud4.png")).convert()
 
 knightSkins=[]
 for i in range(10):
     knightSkins.append(pygame.image.load(os.path.join(knight_dir, "knight"+str(i+1)+".png")).convert_alpha())
 for i in reversed(range(10)):
     knightSkins.append(pygame.image.load(os.path.join(knight_dir, "knight"+str(i+1)+".png")).convert_alpha())
+
 monsterSkins=[]
 for i in range(11):
     monsterSkins.append(pygame.image.load(os.path.join(monster_dir, "monster"+str(i+1)+".png")).convert_alpha())
 for i in reversed(range(11)):
     monsterSkins.append(pygame.image.load(os.path.join(monster_dir, "monster"+str(i+1)+".png")).convert_alpha())
+
+ghostSkins=[]
+for i in range(3):
+    ghostSkins.append(pygame.image.load(os.path.join(ghost_dir, "ghost"+ str(i+1)+".png")).convert_alpha())
+for i in reversed(range(3)):
+     ghostSkins.append(pygame.image.load(os.path.join(ghost_dir, "ghost"+str(i+1)+".png")).convert_alpha())
 
 #loading music
 pygame.mixer.music.load(os.path.join(snd_dir,"music.wav"))
@@ -586,6 +606,7 @@ while running:
         knightgroup.update()
         timeSinceLastKnightFrame =0
 
+    #animates monster
     timeSinceLastMonsterFrame=timeSinceLastMonsterFrame +timesincelasttick
     secperFrameM = (conductor.secPerBeat/(len(monster.images)))*1000
     if(timeSinceLastMonsterFrame/4>secperFrameM):
