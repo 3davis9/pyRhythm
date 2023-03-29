@@ -445,7 +445,7 @@ class Monster(pygame.sprite.Sprite):
         if self.current_health < 0:
             self.current_health = 0
         if self.current_health == 0:
-            window.blit(ghost_dir, (500,500))
+            window.blit(ghost_img, (500,500))
 
 font_match = pygame.font.match_font('arial')
 # text output and render function- draw to game window
@@ -487,6 +487,7 @@ cloud_img = pygame.image.load(os.path.join(cloud_dir, "cloud.png")).convert()
 cloud_img2 = pygame.image.load(os.path.join(cloud_dir, "cloud2.png")).convert()
 cloud_img3 = pygame.image.load(os.path.join(cloud_dir, "cloud3.png")).convert()
 cloud_img4 = pygame.image.load(os.path.join(cloud_dir, "cloud4.png")).convert()
+ghost_img = pygame.image.load(os.path.join(graphics_dir, "ghost1.png")).convert()
 
 knightSkins=[]
 for i in range(10):
