@@ -352,6 +352,9 @@ class Conductor():
             game_sprites.add(missborder)
     
     def hitHandler(self, note):
+        cloud=Cloud()
+        cloudsprites.add(cloud)
+
         monster.decrease_health(5)
         if note=="D":
             hit=movingtext(self.padArray[0].rect.x,hit_img)
@@ -421,8 +424,6 @@ class Monster(pygame.sprite.Sprite):
         if(self.index>=len(self.images)): 
             self.index=0 
         self.image = self.images[self.index]
-
-
     def draw_health_bar(self, surface):
 
         health_bar_width = 200
@@ -445,7 +446,64 @@ class Monster(pygame.sprite.Sprite):
         if self.current_health < 0:
             self.current_health = 0
         if self.current_health == 0:
-            window.blit(ghost_img, (500,500))
+            ghost=Ghost()
+            game_sprites.add(ghost)
+
+
+class Cloud(pygame.sprite.Sprite):
+    def __init__(self):
+            pygame.sprite.Sprite.__init__(self)
+            self.images = [cloud_img,cloud_img2,cloud_img3,cloud_img4]
+            image= self.images[random.randrange(0,3)]
+            sizepx= random.randrange(200,450)
+            xcoord= random.randrange(1000,1250)
+            ycoord= random.randrange(100,250)
+            self.image_original = pygame.transform.scale(image, (sizepx, sizepx))
+            # set colour key for original image
+            self.image_original.set_colorkey(WHITE)
+            # set copy image for sprite rendering
+            self.image = self.image_original.copy()
+            # specify bounding rect for sprite
+            self.rect = self.image.get_rect()
+            self.rect.x = xcoord
+            self.rect.y = ycoord
+            self.alpha = 220
+            self.alpha_change = 5
+    def update(self):
+            self.alpha -= self.alpha_change
+            #this would be for fading in and out
+            #if not 0 <= self.alpha <= 255:
+            #    self.alpha_change *= -1
+            self.image.set_alpha(self.alpha)
+            if(self.alpha<=0):
+                self.kill()
+
+class Ghost(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image_original = pygame.transform.scale(img, (120, 40))
+        # set colour key for original image
+        self.image_original.set_colorkey(BLACK)
+        # set copy image for sprite rendering
+        self.image = self.image_original.copy()
+        # specify bounding rect for sprite
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = 95
+        self.velocity= .5
+        self.alpha = 255
+        self.alpha_change = 5
+        self.fade = False
+    def update(self):
+        self.rect.y-=self.velocity
+        self.alpha -= self.alpha_change
+        #this would be for fading in and out
+        #if not 0 <= self.alpha <= 255:
+        #    self.alpha_change *= -1
+        self.image.set_alpha(self.alpha)
+        if(self.alpha<=0):
+            self.kill()
+    
 
 font_match = pygame.font.match_font('arial')
 # text output and render function- draw to game window
@@ -487,7 +545,6 @@ cloud_img = pygame.image.load(os.path.join(cloud_dir, "cloud.png")).convert()
 cloud_img2 = pygame.image.load(os.path.join(cloud_dir, "cloud2.png")).convert()
 cloud_img3 = pygame.image.load(os.path.join(cloud_dir, "cloud3.png")).convert()
 cloud_img4 = pygame.image.load(os.path.join(cloud_dir, "cloud4.png")).convert()
-ghost_img = pygame.image.load(os.path.join(graphics_dir, "ghost1.png")).convert()
 
 knightSkins=[]
 for i in range(10):
@@ -514,6 +571,7 @@ game_sprites = pygame.sprite.Group()
 note_sprites = pygame.sprite.Group()
 knightgroup= pygame.sprite.Group()
 monstergroup=pygame.sprite.Group()
+cloudsprites = pygame.sprite.Group()
 
 # play background music
 pygame.mixer.music.play(loops=-1)
@@ -567,6 +625,7 @@ while running:
 
 
     #update
+    
     #also start conductor immediately
     if not conductorStarted:
         conductor.start()
@@ -577,9 +636,9 @@ while running:
         conductorStarted=True
     else:
         conductor.update()
-
-    note_sprites.update()
     game_sprites.update()
+    note_sprites.update()
+    cloudsprites.update()
 
     #draw
     #background
@@ -613,14 +672,13 @@ while running:
     note_sprites.draw(window)
     knightgroup.draw(window)
     monstergroup.draw(window)
+    cloudsprites.draw(window)
+   
     # draw health bar
     for monster in monstergroup:
         monster.draw_health_bar(window)
 
 
-
-
-    
     #updates all screen w/ no parameter
     pygame.display.update()
 
