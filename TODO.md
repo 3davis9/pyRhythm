@@ -12,13 +12,13 @@
 
 -score counter(working on this -Anshul)
 
--health bar for monster - Done (i moved health deplete call and cloud calls to the hit handler for now -aja)
+-art for health bar - could use the same art as pads with different color and more width (i will make heart icon-aja)
 
-- art for health bar - could use the same art as pads with different color and more width (i will make heart icon-aja)
+-~~health bar for monster - Done~~
 
--~~art for monster, knight, and background~~ depleted health version of monster (working on this -aja)
+-~~art for monster, knight, and background depleted health version of monster~~
 
--cloud animations to signify damage being taken, along with potential sound effect?
+-~~cloud animations to signify damage being taken, along with potential sound effect?~~
 
 ~~-note movement based on song position~~
 

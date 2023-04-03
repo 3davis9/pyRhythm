@@ -183,7 +183,7 @@ class Conductor():
         #record time song starts
         self.songTimeStart = pygame.time.get_ticks()/1000
         #start song
-        pygame.mixer.music.play()
+        #pygame.mixer.music.play()
 
     def update(self):
         #position in sec
@@ -418,27 +418,36 @@ class Monster(pygame.sprite.Sprite):
         self.notReverse=True
         self.max_health = 100
         self.current_health = self.max_health
+        self.dead = False
 
     def update(self):
         self.index+=1
-        if(self.index>=len(self.images)): 
-            self.index=0 
-        self.image = self.images[self.index]
-    def draw_health_bar(self, surface):
+        if(not self.dead):
+            if(self.index>=len(self.images)-6): 
+                self.index=0 
+            self.image = self.images[self.index]
+        if(self.dead):
+            if(self.index>=len(self.images)):
+                self.index=len(self.images)-6
+            self.image = self.images[self.index]
+            self.image.set_colorkey(WHITE)
+            print(self.index)
 
+        
+    def draw_health_bar(self, surface):
         health_bar_width = 200
         health_bar_height = 40
         health_ratio = self.current_health / self.max_health
         health_bar_fill = health_bar_width * health_ratio
 
         # Position the health bar above the monster sprite
-        health_bar_x = self.rect.x + (self.rect.width - health_bar_width) / 2
-        health_bar_y = self.rect.y
+        health_bar_x = self.rect.x + 10 + (self.rect.width - health_bar_width) / 2
+        health_bar_y = self.rect.y + 45
 
-        outline_rect = pygame.Rect(health_bar_x, health_bar_y, health_bar_width, health_bar_height)
+        outline_rect = pygame.Rect(health_bar_x-5, health_bar_y-5, health_bar_width+10, health_bar_height+10)
         fill_rect = pygame.Rect(health_bar_x, health_bar_y, health_bar_fill, health_bar_height)
 
-        pygame.draw.rect(surface, BLACK, outline_rect, 2)
+        pygame.draw.rect(surface, BLACK, outline_rect, 5)
         pygame.draw.rect(surface, (255, 0, 0), fill_rect)
 
     def decrease_health(self, amount):
@@ -447,7 +456,9 @@ class Monster(pygame.sprite.Sprite):
             self.current_health = 0
         if self.current_health == 0:
             ghost=Ghost()
-            game_sprites.add(ghost)
+            ghostgroup.add(ghost)
+            self.dead=True
+            self.index= len(self.images)-6
 
 
 class Cloud(pygame.sprite.Sprite):
@@ -481,25 +492,22 @@ class Cloud(pygame.sprite.Sprite):
 class Ghost(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image_original = pygame.transform.scale(img, (120, 40))
+        self.image_original = pygame.transform.scale(ghostSkins[0], (200, 200))
         # set colour key for original image
-        self.image_original.set_colorkey(BLACK)
+        self.image_original.set_colorkey(WHITE)
         # set copy image for sprite rendering
         self.image = self.image_original.copy()
         # specify bounding rect for sprite
         self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = 95
-        self.velocity= .5
+        self.rect.x = 1230
+        self.rect.y = 100
+        self.velocity= .2
         self.alpha = 255
-        self.alpha_change = 5
+        self.alpha_change = 1
         self.fade = False
     def update(self):
         self.rect.y-=self.velocity
         self.alpha -= self.alpha_change
-        #this would be for fading in and out
-        #if not 0 <= self.alpha <= 255:
-        #    self.alpha_change *= -1
         self.image.set_alpha(self.alpha)
         if(self.alpha<=0):
             self.kill()
@@ -556,6 +564,11 @@ for i in range(11):
     monsterSkins.append(pygame.image.load(os.path.join(monster_dir, "monster"+str(i+1)+".png")).convert_alpha())
 for i in reversed(range(11)):
     monsterSkins.append(pygame.image.load(os.path.join(monster_dir, "monster"+str(i+1)+".png")).convert_alpha())
+for i in range(3):
+    monsterSkins.append(pygame.image.load(os.path.join(monster_dir, "monsterdead"+str(i+1)+".png")).convert_alpha())
+for i in reversed(range(3)):
+    monsterSkins.append(pygame.image.load(os.path.join(monster_dir, "monsterdead"+str(i+1)+".png")).convert_alpha())
+
 ghostSkins=[]
 for i in range(3):
     ghostSkins.append(pygame.image.load(os.path.join(ghost_dir, "ghost"+ str(i+1)+".png")).convert_alpha())
@@ -572,6 +585,7 @@ note_sprites = pygame.sprite.Group()
 knightgroup= pygame.sprite.Group()
 monstergroup=pygame.sprite.Group()
 cloudsprites = pygame.sprite.Group()
+ghostgroup= pygame.sprite.Group()
 
 # play background music
 pygame.mixer.music.play(loops=-1)
@@ -639,6 +653,7 @@ while running:
     game_sprites.update()
     note_sprites.update()
     cloudsprites.update()
+    ghostgroup.update()
 
     #draw
     #background
@@ -678,6 +693,7 @@ while running:
     for monster in monstergroup:
         monster.draw_health_bar(window)
 
+    ghostgroup.draw(window)
 
     #updates all screen w/ no parameter
     pygame.display.update()
