@@ -132,6 +132,7 @@ class Note(pygame.sprite.Sprite):
         #die at top
         if self.rect.top > winHeight + 15:
             self.kill()
+            
 #manages the song
 class Conductor():
     def __init__(self):
@@ -432,7 +433,6 @@ class Monster(pygame.sprite.Sprite):
             self.image = self.images[self.index]
             self.image.set_colorkey(WHITE)
             print(self.index)
-
         
     def draw_health_bar(self, surface):
         health_bar_width = 200
