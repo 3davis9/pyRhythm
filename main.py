@@ -1,3 +1,4 @@
+import cx_Freeze
 import pygame
 import os
 import sys
@@ -6,7 +7,7 @@ import random
 # Set the screen dimensions
 winWidth = 1600
 winHeight = 900
-FPS = 120
+FPS = 60
 
 # Initialize Pygame
 pygame.init()
@@ -136,7 +137,7 @@ class Note(pygame.sprite.Sprite):
 #manages the song
 class Conductor():
     def __init__(self):
-        self.bmp = 100   #beats per min
+        self.bmp = 160   #beats per min
         self.finishLine=120 #perfect end position of note
         self.hitOffset =50 #largest accepted offset for hit
         self.secPerBeat= 0 #duration of a beat in seconds
@@ -145,23 +146,37 @@ class Conductor():
         self.songPositionBeats = 0 #curr position of song in beats
         self.songTimeStart = 0 #time the song starts
         self.beatsinAdvance = 4 #how many shown beats before finish line
-        pygame.mixer.music.load(os.path.join(snd_dir,"music.wav")) #load the song
+        pygame.mixer.music.load(os.path.join(snd_dir,"pyry.wav")) #load the song
         self.noteSkins= [noteblue_img, noteoran_img, notepurp_img, noteyell_img]
         self.padSkins = [padblue_img, padoran_img, padpurp_img, padyell_img]
 
-        self.notesD = [4,5,6,6.5,8,10,13,15]   #struct to hold notes
-        self.notesShownD =[]             #queue to keep track of notes shown
+        #interlude starts at 105
+
+        self.notesD = [5,9,10.5,12,12.5,13,14.5,17,18.5,20,20.5,21,22.5,25,26.5,28,28.5,29,30.5,33,
+            34.5,36,36.5,37,38.5,41,41.5,43.5,45,45.5,47.5,49,49.5,51.5,53,53.5,55.5,72,73,75.5,77.5,79,
+            83.5,87,89,91.5,93.5,95,97,98.5,100.5,102.5,104,105,112,113,120,121,128,129,130,131,132,133,134,135,136,137,
+            137.5,138.5,139,139.5,140.5,141,141.5,142.5,143,143.5,153,153.5,155,157,157.5,159,169,173,174,185,189,190,
+            199,199.5,200,201,201.5,203.5,209,213,214,217,217.5,219.5,221,221.5,223.5,225,225.5,227.5,229.5,232.75
+            ]   #struct to hold notes
+        self.notesShownD =[] #queue to keep track of notes shown
         self.indexD= 0  #traverses through note structure
 
-        self.notesF= [6,7,9,1014,16]
+        self.notesF= [6,57,57.5,59.5,61,61.5,63.5,65,65.5,67.5,69,69.5,72.25,73.5,79,81.5,87,89.5,95,
+            97.5,104.25,106,111,114,119,122,127,137,138,140,142,144,154,154.5,155.5,156,158,158.5,159.5,160,177,181,182
+            ,193,197,198,199,199.5,200,205,205.5,207.5,232.75]
         self.notesShownF = []
         self.indexF =0 
 
-        self.notesJ =[8,9,10,17,19]
+        self.notesJ =[7,24,40,42,42.5,46,50,50.5,54,56,58,58.5,62,66,66.5,70,72.5,74,76,78,79,82,84,86,87
+            ,90,92,94,95,98,100,102,104.5,107,110,115,118,123,126,137,145,145.5,146.5,147,147.5,148.5,149,149.5,150.5
+            ,151,151.5,152.5,161,161.5,163,165,165.5,167,178,179.5,183,183.5,184,194,195.5,199,199.5,200
+            ,202,202.5,204,210,211.5,232.5,233]
         self.notesShownJ =[]
         self.indexJ =0
 
-        self.notesK= [8,9,10,18,20]
+        self.notesK= [8,16,32,44,48,52,56,60,64,68,72.75,79,87,95,104.75,108,109,116,117,124,125,137,146,
+            148,150,152,152.75,162,162.5,163.5,164,166,166.5,167.5,168,170,171.5,175,175.5,176,186,187.5,191,191.5,192
+            ,199,199.5,200,206,208,215,215.5,216,218,218.5,220,222,224,226,228,230,232,232.5,233]
         self.notesShownK = []
         self.indexK=0
 
@@ -182,9 +197,9 @@ class Conductor():
         self.secPerBeat = 60/self.bmp
         #hopefully clock keeps up  
         #record time song starts
-        self.songTimeStart = pygame.time.get_ticks()/1000
+        self.songTimeStart = pygame.time.get_ticks()/1650
         #start song
-        #pygame.mixer.music.play()
+        pygame.mixer.music.play()
 
     def update(self):
         #position in sec
@@ -417,7 +432,7 @@ class Monster(pygame.sprite.Sprite):
         self.animation_time = 50
         self.current_time = 0
         self.notReverse=True
-        self.max_health = 100
+        self.max_health = 1000
         self.current_health = self.max_health
         self.dead = False
 
