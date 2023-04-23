@@ -1,3 +1,4 @@
+import cx_Freeze
 import pygame
 import os
 import sys
@@ -148,7 +149,11 @@ class Conductor():
         pygame.mixer.music.load(os.path.join(snd_dir,"pyry.wav")) #load the song
         self.noteSkins= [noteblue_img, noteoran_img, notepurp_img, noteyell_img]
         self.padSkins = [padblue_img, padoran_img, padpurp_img, padyell_img]
-
+        self.total_hits = 0
+        self.correct_hits = 0
+        self.score = 0
+        self.hit_streak = 0
+        self.multiplier = 1
         #interlude starts at 105
 
         self.notesD = [5,9,10.5,12,12.5,13,14.5,17,18.5,20,20.5,21,22.5,25,26.5,28,28.5,29,30.5,33,
@@ -293,12 +298,14 @@ class Conductor():
     
     #maybe a handle input method for each track
     def handleD(self, monster):
+        self.total_hits += 1
         #if there are notes present,
         if len(self.notesShownD)>0:
             #find how far note is from desired line
             offset= abs(self.notesShownD[0].rect.y - self.finishLine)
             #check if it is close enough
             if(offset<=self.hitOffset):
+                self.correct_hits += 1
                 self.hitHandler("D")
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownD.pop(0)
@@ -306,36 +313,42 @@ class Conductor():
 
 
     def handleF(self, monster):
+        self.total_hits += 1
         #if there are notes present,
         if len(self.notesShownF)>0:
             #find how far note is from desired line
             offset= abs(self.notesShownF[0].rect.y - self.finishLine)
             #check if it is close enough
             if(offset<=self.hitOffset):
+                self.correct_hits += 1
                 self.hitHandler("F")
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownF.pop(0)
                 toKill.kill()
 
     def handleJ(self, monster):
+        self.total_hits += 1
         #if there are notes present,
         if len(self.notesShownJ)>0:
             #find how far note is from desired line
             offset= abs(self.notesShownJ[0].rect.y - self.finishLine)
             #check if it is close enough
             if(offset<=self.hitOffset):
+                self.correct_hits += 1
                 self.hitHandler("J")
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownJ.pop(0)
                 toKill.kill()
 
     def handleK(self, monster):
+        self.total_hits += 1
         #if there are notes present,
         if len(self.notesShownK)>0:
             #find how far note is from desired line
             offset= abs(self.notesShownK[0].rect.y - self.finishLine)
             #check if it is close enough
             if(offset<=self.hitOffset):
+                self.correct_hits += 1
                 self.hitHandler("K")
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownK.pop(0)
@@ -343,6 +356,10 @@ class Conductor():
 
     #miss and hit handlers manage the animations missing and hitting notes
     def missHandler(self, note):
+        monster.increase_health(20)
+        self.hit_streak = 0
+        if self.score>0:
+            self.score -= 10
         if note=="D":
             #the positions of flashing borders and text depend on the array that holds the pads
             #access the positions of the pads using the array
@@ -367,10 +384,30 @@ class Conductor():
             game_sprites.add(missborder)
     
     def hitHandler(self, note):
+        self.hit_streak += 1
+        if self.hit_streak >= 5 and self.hit_streak <10:
+            self.multiplier = 2
+
+        elif self.hit_streak >= 10 and self.hit_streak <15:
+            self.multiplier = 3
+
+        elif self.hit_streak >= 15 and self.hit_streak <20:
+            self.multiplier = 4
+
+        elif self.hit_streak >= 20:
+            self.multiplier = 5
+
+        self.score += 10 * self.multiplier
         cloud=Cloud()
         cloudsprites.add(cloud)
+        # Calculate the correct_hits / total_hits ratio
+        hit_ratio = self.correct_hits / self.total_hits
 
-        monster.decrease_health(5)
+        # Check if the ratio is above 20%
+        if hit_ratio >= 0.2:
+            monster.decrease_health(3.6)
+
+
         if note=="D":
             hit=movingtext(self.padArray[0].rect.x,hit_img)
             game_sprites.add(hit)
@@ -473,6 +510,11 @@ class Monster(pygame.sprite.Sprite):
             ghostgroup.add(ghost)
             self.dead=True
             self.index= len(self.images)-6
+
+    def increase_health(self, amount):
+        self.current_health += amount
+        if self.current_health > self.max_health:
+            self.current_health = self.max_health
 
 
 class Cloud(pygame.sprite.Sprite):
@@ -674,12 +716,24 @@ while running:
     window.blit(bg_img, bg_rect)
     window.blit(sword_img, (10,40))
 
+    textRender(window, "Score: " + str(conductor.score), 40, 250, 40)
+
+   # for i in range(3):
+   # new_x = random.randrange(0, display_width)
+   # new_y = random.randrange(0, display_height)
+   # met = Meteor(new_x, new_y)
+   # rotation = random.randint(0, 359) # Some line here to pick a random rotation
+   # size = random.randint(1, 3)       # some line here to pick a random scale
+   # met.pic = pygame.transform.rotozoom(met.pic, rotation, size)  # How do I put this in
+   # all_meteors.add(met)    #this only allows x and y
+    textRender(window, "Hit Streak: " + str(conductor.hit_streak),40, 550, 40)
+   
 
     #prints beats in time
-    timeSinceLastAction= timeSinceLastAction + timesincelasttick
-    if(timeSinceLastAction>(conductor.secPerBeat*1000)):
-        beat=beat+1
-        timeSinceLastAction=0
+    #timeSinceLastAction= timeSinceLastAction + timesincelasttick
+    #if(timeSinceLastAction>(conductor.secPerBeat*1000)):
+    #    beat=beat+1
+    #    timeSinceLastAction=0
     
     #animates knight in time hopefully
     timeSinceLastKnightFrame=timeSinceLastKnightFrame +timesincelasttick
@@ -695,7 +749,7 @@ while running:
         monstergroup.update()
         timeSinceLastMonsterFrame =0
         
-    textRender(window, str(beat), 100, 500,500)
+    #textRender(window, str(beat), 100, 500,500)
 
     game_sprites.draw(window)
     note_sprites.draw(window)
