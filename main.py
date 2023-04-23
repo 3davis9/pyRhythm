@@ -404,7 +404,7 @@ class Conductor():
 
         # Check if the ratio is above 20%
         if hit_ratio >= 0.2:
-            monster.decrease_health(20)
+            monster.decrease_health(3.6)
 
 
         if note=="D":
@@ -717,12 +717,23 @@ while running:
     window.blit(sword_img, (10,40))
 
     textRender(window, "Score: " + str(conductor.score), 40, 250, 40)
-    textRender(window, "Hit Streak: " + str(conductor.hit_streak), 40, 550, 40)
+
+   # for i in range(3):
+   # new_x = random.randrange(0, display_width)
+   # new_y = random.randrange(0, display_height)
+   # met = Meteor(new_x, new_y)
+   # rotation = random.randint(0, 359) # Some line here to pick a random rotation
+   # size = random.randint(1, 3)       # some line here to pick a random scale
+   # met.pic = pygame.transform.rotozoom(met.pic, rotation, size)  # How do I put this in
+   # all_meteors.add(met)    #this only allows x and y
+    textRender(window, "Hit Streak: " + str(conductor.hit_streak),40, 550, 40)
+   
+
     #prints beats in time
-    timeSinceLastAction= timeSinceLastAction + timesincelasttick
-    if(timeSinceLastAction>(conductor.secPerBeat*1000)):
-        beat=beat+1
-        timeSinceLastAction=0
+    #timeSinceLastAction= timeSinceLastAction + timesincelasttick
+    #if(timeSinceLastAction>(conductor.secPerBeat*1000)):
+    #    beat=beat+1
+    #    timeSinceLastAction=0
     
     #animates knight in time hopefully
     timeSinceLastKnightFrame=timeSinceLastKnightFrame +timesincelasttick
@@ -738,7 +749,7 @@ while running:
         monstergroup.update()
         timeSinceLastMonsterFrame =0
         
-    textRender(window, str(beat), 100, 500,500)
+    #textRender(window, str(beat), 100, 500,500)
 
     game_sprites.draw(window)
     note_sprites.draw(window)
