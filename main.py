@@ -1,4 +1,4 @@
-import cx_Freeze
+#import cx_Freeze
 import pygame
 import os
 import sys
@@ -385,7 +385,9 @@ class Conductor():
     
     def hitHandler(self, note):
         self.hit_streak += 1
-        if self.hit_streak >= 5 and self.hit_streak <10:
+        if self.hit_streak < 5:
+            self.multiplier = 1
+        elif self.hit_streak >= 5 and self.hit_streak <10:
             self.multiplier = 2
 
         elif self.hit_streak >= 10 and self.hit_streak <15:
@@ -727,6 +729,8 @@ while running:
    # met.pic = pygame.transform.rotozoom(met.pic, rotation, size)  # How do I put this in
    # all_meteors.add(met)    #this only allows x and y
     textRender(window, "Hit Streak: " + str(conductor.hit_streak),40, 550, 40)
+
+    textRender(window, "Multiplier: " + str(conductor.multiplier), 40, 850, 40)
    
 
     #prints beats in time
