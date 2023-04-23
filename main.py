@@ -34,7 +34,44 @@ ghost_dir = os.path.join(graphics_dir, "ghost")
 snd_dir = os.path.join(assets_dir, "music")
 font_dir = os.path.join(assets_dir, "fonts")
 
+def show_game_stats():
+    # Create a semi-transparent surface
+    transparent_surface = pygame.Surface((winWidth, winHeight), pygame.SRCALPHA)
+    transparent_surface.fill((0, 0, 0, 128))  # RGBA: black with 50% transparency
+
+    # Define font and color for the text
+    font_name = pygame.font.match_font('arial')
+    font = pygame.font.Font(font_name, 36)
+    text_color = WHITE
+
+    # Display the game stats
+    stats = [
+        "Game Over",
+        "Your Score: {}".format(conductor.score),
+        "Press any key to exit"
+    ]
+
+    for index, line in enumerate(stats):
+        rendered_text = font.render(line, True, text_color)
+        text_rect = rendered_text.get_rect()
+        text_rect.center = ((winWidth // 2)-25, winHeight // 2 + index * 50 - 30)
+        transparent_surface.blit(rendered_text, text_rect)
+
+    # Draw the transparent surface on top of the current screen
+    window.blit(transparent_surface, (0, 0))
+
+    # Update the display
+    pygame.display.flip()
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                return
+            if event.type == pygame.QUIT:
+                return
+
 def gameExit():
+    show_game_stats()
     pygame.quit()
     sys.exit()
 
@@ -169,7 +206,7 @@ class Conductor():
             97.5,104.25,106,111,114,119,122,127,137,138,140,142,144,154,154.5,155.5,156,158,158.5,159.5,160,177,181,182
             ,193,197,198,199,199.5,200,205,205.5,207.5,232.75]
         self.notesShownF = []
-        self.indexF =0 
+        self.indexF =0
 
         self.notesJ =[7,24,40,42,42.5,46,50,50.5,54,56,58,58.5,62,66,66.5,70,72.5,74,76,78,79,82,84,86,87
             ,90,92,94,95,98,100,102,104.5,107,110,115,118,123,126,137,145,145.5,146.5,147,147.5,148.5,149,149.5,150.5
@@ -184,6 +221,7 @@ class Conductor():
         self.notesShownK = []
         self.indexK=0
 
+        self.all_notes_played_time = 0
         self.padArray=[]
 
     def start(self):
@@ -295,7 +333,15 @@ class Conductor():
                 self.notesShownK.pop(0)
                 self.missHandler("K")
 
-    
+        # Check if all the notes have been played and wait for 5 seconds before quitting
+        if len(self.notesShownD) == 0 and len(self.notesShownF) == 0 and len(self.notesShownJ) == 0 and len(
+                self.notesShownK) == 0:
+            if self.all_notes_played_time == 0:
+                self.all_notes_played_time = pygame.time.get_ticks()
+            elif pygame.time.get_ticks() - self.all_notes_played_time >= 3000:
+                gameExit()
+
+
     #maybe a handle input method for each track
     def handleD(self, monster):
         self.total_hits += 1
