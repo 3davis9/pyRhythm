@@ -21,6 +21,14 @@ clock = pygame.time.Clock()
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
+#color variables
+
+col_spd = 1
+col_dir = [1,1,1]
+def_col = [100,100,0]
+
+
+
 #set up asset directory
 game_dir = os.path.dirname(__file__)
 # relative path to assets dir
@@ -583,6 +591,15 @@ def textRender(surface, text, size, x, y):
     # add text surface to location of text rect
     surface.blit(text_surface, text_rect)
 
+
+
+def col_change(col,dir):
+    for i in range(3):
+        col[i]+= col_spd*dir[i]
+        if col[i] >= 255:
+           col[i] = 0
+        elif col[i] <= 0:
+            col[i]=255
 #SETTING BG
 # load graphics/images for the game
 bg_img = pygame.image.load(os.path.join(graphics_dir, "forestdivide.png")).convert()
@@ -726,8 +743,19 @@ while running:
    # size = random.randint(1, 3)       # some line here to pick a random scale
    # met.pic = pygame.transform.rotozoom(met.pic, rotation, size)  # How do I put this in
    # all_meteors.add(met)    #this only allows x and y
-    textRender(window, "Hit Streak: " + str(conductor.hit_streak),40, 550, 40)
-   
+    if (conductor.hit_streak >=30):
+        textRender(window, "Hit Streak: " + str(conductor.hit_streak),random.randint(40,50), 550, 40)
+    elif(conductor.hit_streak>=50):
+        textRender(window, "Hit Streak: " + str(conductor.hit_streak),random.randint(50,60), 550, 40)
+    elif(conductor.hit_streak>=100):
+        textRender(window, "Hit Streak: " + str(conductor.hit_streak),random.randint(60,70), 550, 40)
+
+
+    else:
+        textRender(window, "Hit Streak: " + str(conductor.hit_streak),40, 550, 40)
+
+    
+           
 
     #prints beats in time
     #timeSinceLastAction= timeSinceLastAction + timesincelasttick
