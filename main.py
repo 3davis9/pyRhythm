@@ -41,6 +41,7 @@ cloud_dir = os.path.join(graphics_dir, "cloud")
 ghost_dir = os.path.join(graphics_dir, "ghost")
 snd_dir = os.path.join(assets_dir, "music")
 font_dir = os.path.join(assets_dir, "fonts")
+fire_dir = os.path.join(graphics_dir, "fire")
 
 def gameExit():
     pygame.quit()
@@ -576,6 +577,29 @@ class Ghost(pygame.sprite.Sprite):
         if(self.alpha<=0):
             self.kill()
     
+class Fire(pygame.sprite.Sprite):
+    def __init__(self):
+         pygame.sprite.Sprite.__init__(self)
+         self.image_original = pygame.transform.scale(fireSkins[0], (200, 200))
+         # set colour key for original image
+         self.image_original.set_colorkey(WHITE)
+         # set copy image for sprite rendering
+         self.image = self.image_original.copy()
+         # specify bounding rect for sprite
+         self.rect = self.image.get_rect()
+         self.rect.x = 550
+         self.rect.y = 30
+         self.velocity= .2
+         self.alpha = 255
+         self.alpha_change = 1
+         self.fade = False
+    def update(self):
+         self.rect.y-=self.velocity
+         self.alpha -= self.alpha_change
+         self.image.set_alpha(self.alpha)
+         if(self.alpha<=0):
+             self.kill()
+ 
 
 font_match = pygame.font.match_font('arial')
 # text output and render function- draw to game window
@@ -626,12 +650,17 @@ cloud_img = pygame.image.load(os.path.join(cloud_dir, "cloud.png")).convert()
 cloud_img2 = pygame.image.load(os.path.join(cloud_dir, "cloud2.png")).convert()
 cloud_img3 = pygame.image.load(os.path.join(cloud_dir, "cloud3.png")).convert()
 cloud_img4 = pygame.image.load(os.path.join(cloud_dir, "cloud4.png")).convert()
+fire1 = pygame.image.load(os.path.join(fire_dir, "f1.png")).convert()
+fire2 = pygame.image.load(os.path.join(fire_dir, "f2.png")).convert()
+fire3 = pygame.image.load(os.path.join(fire_dir, "f3.png")).convert()
+fire4 = pygame.image.load(os.path.join(fire_dir, "f4.png")).convert()
 
 knightSkins=[]
 for i in range(10):
     knightSkins.append(pygame.image.load(os.path.join(knight_dir, "knight"+str(i+1)+".png")).convert_alpha())
 for i in reversed(range(10)):
     knightSkins.append(pygame.image.load(os.path.join(knight_dir, "knight"+str(i+1)+".png")).convert_alpha())
+
 monsterSkins=[]
 for i in range(11):
     monsterSkins.append(pygame.image.load(os.path.join(monster_dir, "monster"+str(i+1)+".png")).convert_alpha())
@@ -642,11 +671,17 @@ for i in range(3):
 for i in reversed(range(3)):
     monsterSkins.append(pygame.image.load(os.path.join(monster_dir, "monsterdead"+str(i+1)+".png")).convert_alpha())
 
+fireSkins=[]
+for i in range (4):
+    fireSkins.append(pygame.image.load(os.path.join(fire_dir, "f"+str(i+1)+".png")).convert_alpha())
+for i in reversed(range(3)):
+    fireSkins.append(pygame.image.load(os.path.join(fire_dir, "f"+str(i+1)+".png")).convert_alpha())
+
 ghostSkins=[]
 for i in range(3):
     ghostSkins.append(pygame.image.load(os.path.join(ghost_dir, "ghost"+ str(i+1)+".png")).convert_alpha())
 for i in reversed(range(3)):
-     ghostSkins.append(pygame.image.load(os.path.join(ghost_dir, "ghost"+str(i+1)+".png")).convert_alpha())
+    ghostSkins.append(pygame.image.load(os.path.join(ghost_dir, "ghost"+str(i+1)+".png")).convert_alpha())
 
 #loading music
 pygame.mixer.music.load(os.path.join(snd_dir,"music.wav"))
@@ -659,7 +694,7 @@ knightgroup= pygame.sprite.Group()
 monstergroup=pygame.sprite.Group()
 cloudsprites = pygame.sprite.Group()
 ghostgroup= pygame.sprite.Group()
-
+fireGroup = pygame.sprite.Group()
 # play background music
 pygame.mixer.music.play(loops=-1)
 
@@ -671,6 +706,7 @@ conductorStarted = False
 timeSinceLastAction =0
 timeSinceLastKnightFrame=0
 timeSinceLastMonsterFrame=0
+timeSinceLastFireFrame  =0
 beat=0
 
 # Set the game loop
@@ -727,13 +763,14 @@ while running:
     note_sprites.update()
     cloudsprites.update()
     ghostgroup.update()
+    fireGroup.update()
 
     #draw
     #background
     window.blit(bg_img, bg_rect)
     window.blit(sword_img, (10,40))
 
-    textRender(window, "Score: " + str(conductor.score), 40, 250, 40)
+    textRender(window, "SCORE: " + str(conductor.score), 40, 250, 40)
 
    # for i in range(3):
    # new_x = random.randrange(0, display_width)
@@ -744,17 +781,17 @@ while running:
    # met.pic = pygame.transform.rotozoom(met.pic, rotation, size)  # How do I put this in
    # all_meteors.add(met)    #this only allows x and y
     if (conductor.hit_streak >=30):
-        textRender(window, "Hit Streak: " + str(conductor.hit_streak),random.randint(40,50), 550, 40)
+        textRender(window, "STREAK: " + str(conductor.hit_streak),random.randint(40,43), 550, 40)
     elif(conductor.hit_streak>=50):
-        textRender(window, "Hit Streak: " + str(conductor.hit_streak),random.randint(50,60), 550, 40)
+        textRender(window, "STREAK: " + str(conductor.hit_streak),random.randint(50,60), 550, 40)
     elif(conductor.hit_streak>=100):
-        textRender(window, "Hit Streak: " + str(conductor.hit_streak),random.randint(60,70), 550, 40)
-
+        textRender(window, "STREAK: " + str(conductor.hit_streak),random.randint(90,120), 550, 40)
+        fire=Fire()
+        fireGroup.add(fire)
 
     else:
-        textRender(window, "Hit Streak: " + str(conductor.hit_streak),40, 550, 40)
-
-    
+        textRender(window, "STREAK: " + str(conductor.hit_streak),40, 550, 40)
+        
            
 
     #prints beats in time
@@ -790,6 +827,7 @@ while running:
         monster.draw_health_bar(window)
 
     ghostgroup.draw(window)
+    fireGroup.draw(window)
 
     #updates all screen w/ no parameter
     pygame.display.update()
