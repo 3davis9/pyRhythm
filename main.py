@@ -34,6 +34,46 @@ ghost_dir = os.path.join(graphics_dir, "ghost")
 snd_dir = os.path.join(assets_dir, "music")
 font_dir = os.path.join(assets_dir, "fonts")
 
+
+def show_game_stats():
+    # Create a semi-transparent surface
+    transparent_surface = pygame.Surface((winWidth, winHeight), pygame.SRCALPHA)
+    transparent_surface.fill((0, 0, 0, 128))  # RGBA: black with 50% transparency
+
+    # Define font and color for the text
+    font_name = pygame.font.match_font('arial')
+    font = pygame.font.Font(font_name, 36)
+    text_color = WHITE
+    monster_dead = monster.dead
+    # Display the game stats
+    stats = [
+        "Game Over",
+        "Your Score: {}".format(conductor.score),
+        "You longest Hit Streak: {}".format(conductor.longest_hit_streak),
+        "You Win! You killed the Monster!" if monster_dead else "You Lose! The Monster is still alive",
+        "Press esc key to exit"
+    ]
+
+    for index, line in enumerate(stats):
+        rendered_text = font.render(line, True, text_color)
+        text_rect = rendered_text.get_rect()
+        text_rect.center = ((winWidth // 2) - 70, winHeight // 2 + index * 50 - 70)
+        transparent_surface.blit(rendered_text, text_rect)
+
+    # Draw the transparent surface on top of the current screen
+    window.blit(transparent_surface, (0, 0))
+
+    # Update the display
+    pygame.display.flip()
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:  # Check for the ESC key
+                    gameExit()
+            if event.type == pygame.QUIT:
+                gameExit()
+
 def gameExit():
     pygame.quit()
     sys.exit()
@@ -154,6 +194,7 @@ class Conductor():
         self.score = 0
         self.hit_streak = 0
         self.multiplier = 1
+        self.longest_hit_streak = 0
         ####self.totalHits = 0###################################################
         ####self.targetHits = 1###############################################
         #interlude starts at 105
@@ -185,7 +226,7 @@ class Conductor():
             ,199,199.5,200,206,208,215,215.5,216,218,218.5,220,222,224,226,228,230,232,232.5,233]
         self.notesShownK = []
         self.indexK=0
-
+        self.all_notes_played_time = 0
         self.padArray=[]
 
     def start(self):
@@ -297,6 +338,13 @@ class Conductor():
                 self.notesShownK.pop(0)
                 self.missHandler("K")
 
+        # Check if all the notes have been played and wait for 5 seconds before quitting
+        if len(self.notesShownD) == 0 and len(self.notesShownF) == 0 and len(self.notesShownJ) == 0 and len(
+                 self.notesShownK) == 0:
+             if self.all_notes_played_time == 0:
+                 self.all_notes_played_time = pygame.time.get_ticks()
+             elif pygame.time.get_ticks() - self.all_notes_played_time >= 3000:
+                 show_game_stats()
     
     #maybe a handle input method for each track
     def handleD(self, monster):
@@ -359,6 +407,8 @@ class Conductor():
     #miss and hit handlers manage the animations missing and hitting notes
     def missHandler(self, note):
         monster.increase_health(20)
+        if(self.longest_hit_streak < self.hit_streak):
+            self.longest_hit_streak = self.hit_streak
         self.hit_streak = 0
         if self.score>0:
             self.score -= 10
@@ -536,9 +586,10 @@ class Monster(pygame.sprite.Sprite):
             self.index= len(self.images)-6
 
     def increase_health(self, amount):
-        self.current_health += amount
-        if self.current_health > self.max_health:
-            self.current_health = self.max_health
+        if not self.dead:
+            self.current_health += amount
+            if self.current_health > self.max_health:
+                self.current_health = self.max_health
 
 
 class Cloud(pygame.sprite.Sprite):
