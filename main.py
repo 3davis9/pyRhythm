@@ -14,7 +14,7 @@ pygame.init()
 pygame.mixer.init()
 window = pygame.display.set_mode((winWidth, winHeight))
 # Set the caption
-pygame.display.set_caption("Rhythm Game")
+pygame.display.set_caption("Rhythm Knight")
 clock = pygame.time.Clock()
 
 #set common color
@@ -198,8 +198,7 @@ class Conductor():
         self.hit_streak = 0
         self.multiplier = 1
         self.longest_hit_streak = 0
-        ####self.totalHits = 0###################################################
-        ####self.targetHits = 1###############################################
+       
         #interlude starts at 105
 
         self.notesD = [5,9,10.5,12,12.5,13,14.5,17,18.5,20,20.5,21,22.5,25,26.5,28,28.5,29,30.5,33,
@@ -347,6 +346,7 @@ class Conductor():
              if self.all_notes_played_time == 0:
                  self.all_notes_played_time = pygame.time.get_ticks()
             
+            #spawn the ghost before end screen
              if(monster.dead and monster.ghostnotspawned):
                 ghost=Ghost()
                 ghostgroup.add(ghost)
@@ -416,6 +416,7 @@ class Conductor():
         self.hit_streak = 0
         #if self.score>0:
         #    self.score -= 10
+
         if note=="D":
             #the positions of flashing borders and text depend on the array that holds the pads
             #access the positions of the pads using the array
@@ -485,21 +486,18 @@ class Conductor():
             hitborder= padBorder(self.padArray[0].rect.x,self.padArray[0].rect.y,padhit_img)
             game_sprites.add(hitborder)
             self.padArray[0].flashSkin()
-            window.blit( cloud_img, (500, 500),)
         if note=="F":
             hit=movingtext(self.padArray[1].rect.x,hit_img)
             game_sprites.add(hit)
             hitborder= padBorder(self.padArray[1].rect.x,self.padArray[1].rect.y,padhit_img)
             game_sprites.add(hitborder)
             self.padArray[1].flashSkin()
-            window.blit( cloud_img2, (500, 50),)
         if note=="J":
             hit=movingtext(self.padArray[2].rect.x,hit_img)
             game_sprites.add(hit)
             hitborder= padBorder(self.padArray[2].rect.x,self.padArray[2].rect.y,padhit_img)
             game_sprites.add(hitborder)
             self.padArray[2].flashSkin()
-            window.blit( cloud_img3, (550,60),)
 
         if note=="K":
             hit=movingtext(self.padArray[3].rect.x,hit_img)
@@ -507,7 +505,6 @@ class Conductor():
             hitborder= padBorder(self.padArray[3].rect.x,self.padArray[3].rect.y,padhit_img)
             game_sprites.add(hitborder)
             self.padArray[3].flashSkin()
-            window.blit( cloud_img4, (700, 700),)
 
 class Knight(pygame.sprite.Sprite):
     def __init__(self):
@@ -566,7 +563,6 @@ class Monster(pygame.sprite.Sprite):
         health_bar_height = 40
         health_ratio = self.current_health / self.max_health
         health_bar_fill = health_bar_width * health_ratio
-        ###################health =  conductor.correct_hits/conductor.targetHits##############
 
         # Position the health bar above the monster sprite
         health_bar_x = self.rect.x + 10 + (self.rect.width - health_bar_width) / 2
@@ -705,7 +701,6 @@ for i in reversed(range(3)):
      ghostSkins.append(pygame.image.load(os.path.join(ghost_dir, "ghost"+str(i+1)+".png")).convert_alpha())
 
 #loading music
-pygame.mixer.music.load(os.path.join(snd_dir,"music.wav"))
 pygame.mixer.music.set_volume(1)
 
 # create sprite groups
@@ -716,15 +711,11 @@ monstergroup=pygame.sprite.Group()
 cloudsprites = pygame.sprite.Group()
 ghostgroup= pygame.sprite.Group()
 
-# play background music
-pygame.mixer.music.play(loops=-1)
-
 #create conductor
 conductor = Conductor()
 conductorStarted = False
 
-
-#variables for beat counterdkjfdkj
+#variables for beat counter
 timeSinceLastAction =0
 timeSinceLastKnightFrame=0
 timeSinceLastMonsterFrame=0
@@ -780,6 +771,7 @@ while running:
         conductorStarted=True
     else:
         conductor.update()
+
     game_sprites.update()
     note_sprites.update()
     cloudsprites.update()
@@ -792,14 +784,6 @@ while running:
 
     textRender(window, "SCORE: " + str(conductor.score)+" x" + str(conductor.multiplier), 40, 300, 40)
 
-   # for i in range(3):
-   # new_x = random.randrange(0, display_width)
-   # new_y = random.randrange(0, display_height)
-   # met = Meteor(new_x, new_y)
-   # rotation = random.randint(0, 359) # Some line here to pick a random rotation
-   # size = random.randint(1, 3)       # some line here to pick a random scale
-   # met.pic = pygame.transform.rotozoom(met.pic, rotation, size)  # How do I put this in
-   # all_meteors.add(met)    #this only allows x and y
     if (conductor.hit_streak >=30):
         textRender(window, "STREAK: " + str(conductor.hit_streak),random.randint(40,43), 650, 40)
     elif(conductor.hit_streak>=50):
@@ -809,10 +793,6 @@ while running:
  
     else:
         textRender(window, "STREAK: " + str(conductor.hit_streak),40, 650, 40)
-
-    
-    #textRender(window, "x" + str(conductor.multiplier), 40, 450, 40)
-   
 
     #prints beats in time
     #timeSinceLastAction= timeSinceLastAction + timesincelasttick
