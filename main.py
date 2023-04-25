@@ -154,6 +154,8 @@ class Conductor():
         self.score = 0
         self.hit_streak = 0
         self.multiplier = 1
+        ####self.totalHits = 0###################################################
+        ####self.targetHits = 1###############################################
         #interlude starts at 105
 
         self.notesD = [5,9,10.5,12,12.5,13,14.5,17,18.5,20,20.5,21,22.5,25,26.5,28,28.5,29,30.5,33,
@@ -419,10 +421,12 @@ class Conductor():
         cloudsprites.add(cloud)
         # Calculate the correct_hits / total_hits ratio
 
-        #totalHits = len(conductor.notesD)+ len(conductor.notesF)+len(conductor.notesJ)+len(conductor.notesK)
+        #####self.totalHits = len(conductor.notesD)+ len(conductor.notesF)+len(conductor.notesJ)+len(conductor.notesK)###############
+        #####self.targetHits = self.totalHits * .9##########################################################################
+        
         hit_ratio = self.correct_hits / self.total_hits
 
-        # Check if the ratio is above 20%
+        #Check if the ratio is above 20%
         if hit_ratio >= 0.2:
             monster.decrease_health(3.6)
 
@@ -509,6 +513,7 @@ class Monster(pygame.sprite.Sprite):
         health_bar_height = 40
         health_ratio = self.current_health / self.max_health
         health_bar_fill = health_bar_width * health_ratio
+        ###################health =  conductor.correct_hits/conductor.targetHits##############
 
         # Position the health bar above the monster sprite
         health_bar_x = self.rect.x + 10 + (self.rect.width - health_bar_width) / 2
