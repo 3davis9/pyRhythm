@@ -351,9 +351,8 @@ class Conductor():
                 ghost=Ghost()
                 ghostgroup.add(ghost)
                 monster.ghostnotspawned=False
-                print("spawn")
         
-             elif pygame.time.get_ticks() - self.all_notes_played_time >= 3000:
+             if pygame.time.get_ticks() - self.all_notes_played_time >= 3000:
                  show_game_stats()
     
     #maybe a handle input method for each track
@@ -411,7 +410,7 @@ class Conductor():
         self.missedhits +=1
         self.total_hits += 1
         miss_ratio = self.missedhits / self.total_hits
-        monster.increase_health(15*miss_ratio)
+        monster.increase_health(20*miss_ratio)
         if(self.longest_hit_streak < self.hit_streak):
             self.longest_hit_streak = self.hit_streak
         self.hit_streak = 0
@@ -477,7 +476,7 @@ class Conductor():
         cloud=Cloud()
         cloudsprites.add(cloud)
         
-        monster.decrease_health(5+self.multiplier)
+        monster.decrease_health(3+self.multiplier)
 
 
         if note=="D":
