@@ -385,24 +385,41 @@ class Conductor():
     
     def hitHandler(self, note):
         self.hit_streak += 1
-        if self.hit_streak < 5:
+        if self.hit_streak <20:
             self.multiplier = 1
-        elif self.hit_streak >= 5 and self.hit_streak <10:
+        elif self.hit_streak >=20  and self.hit_streak <30:
             self.multiplier = 2
-
-        elif self.hit_streak >= 10 and self.hit_streak <15:
+        elif self.hit_streak >= 30 and self.hit_streak <40:
             self.multiplier = 3
-
-        elif self.hit_streak >= 15 and self.hit_streak <20:
+        elif self.hit_streak >= 40 and self.hit_streak <50:
             self.multiplier = 4
-
-        elif self.hit_streak >= 20:
+        elif self.hit_streak >= 50 and self.hit_streak<60:
             self.multiplier = 5
+        elif self.hit_streak >= 60 and self.hit_streak<70:
+             self.multiplier = 6
+        elif self.hit_streak >= 70 and self.hit_streak<80:
+             self.multiplier = 7
+        elif self.hit_streak >= 80 and self.hit_streak<90:
+             self.multiplier = 8
+        elif self.hit_streak >= 90 and self.hit_streak<100:
+             self.multiplier = 9
+        elif self.hit_streak >=100 and self.hit_streak<149:
+             self.multiplier=10
+        elif self.hit_streak >=150 and self.hit_streak<299:
+              self.multiplier=15
+        elif self.hit_streak>=200 and self.hit_streak<250:
+             self.multiplier=20
+        elif self.hit_streak>=250 and self.hit_streak<300:
+              self.multiplier=25
+        elif self.hit_streak>=300:
+              self.multiplier=30
 
         self.score += 10 * self.multiplier
         cloud=Cloud()
         cloudsprites.add(cloud)
         # Calculate the correct_hits / total_hits ratio
+
+        #totalHits = len(conductor.notesD)+ len(conductor.notesF)+len(conductor.notesJ)+len(conductor.notesK)
         hit_ratio = self.correct_hits / self.total_hits
 
         # Check if the ratio is above 20%
@@ -718,7 +735,7 @@ while running:
     window.blit(bg_img, bg_rect)
     window.blit(sword_img, (10,40))
 
-    textRender(window, "Score: " + str(conductor.score), 40, 250, 40)
+    textRender(window, "SCORE: " + str(conductor.score)+" x" + str(conductor.multiplier), 40, 300, 40)
 
    # for i in range(3):
    # new_x = random.randrange(0, display_width)
@@ -728,9 +745,20 @@ while running:
    # size = random.randint(1, 3)       # some line here to pick a random scale
    # met.pic = pygame.transform.rotozoom(met.pic, rotation, size)  # How do I put this in
    # all_meteors.add(met)    #this only allows x and y
-    textRender(window, "Hit Streak: " + str(conductor.hit_streak),40, 550, 40)
+    if (conductor.hit_streak >=30):
+        textRender(window, "STREAK: " + str(conductor.hit_streak),random.randint(40,43), 650, 40)
+    elif(conductor.hit_streak>=50):
+        textRender(window, "STREAK: " + str(conductor.hit_streak),random.randint(50,60), 650, 40)
+    elif(conductor.hit_streak>=100):
+        textRender(window, "STREAK: " + str(conductor.hit_streak),random.randint(90,120), 650, 40)
+        ifire=Fire()
+        fireGroup.add(fire)
+ 
+    else:
+        textRender(window, "STREAK: " + str(conductor.hit_streak),40, 650, 40)
 
-    textRender(window, "Multiplier: " + str(conductor.multiplier), 40, 850, 40)
+    
+    #textRender(window, "x" + str(conductor.multiplier), 40, 450, 40)
    
 
     #prints beats in time
