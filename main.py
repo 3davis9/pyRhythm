@@ -51,7 +51,7 @@ def show_game_stats():
     stats = [
         "Game Over",
         "Your Score: {}".format(conductor.score),
-        "You longest Hit Streak: {}".format(conductor.longest_hit_streak),
+        "Longest Hit Streak: {}".format(conductor.longest_hit_streak),
         "You Win! You killed the Monster!" if monster_dead else "You Lose! The Monster is still alive",
         "Press esc key to exit"
     ]
@@ -455,29 +455,29 @@ class Conductor():
         elif self.hit_streak >= 50 and self.hit_streak<60:
             self.multiplier = 5
         elif self.hit_streak >= 60 and self.hit_streak<70:
-             self.multiplier = 6
+            self.multiplier = 6
         elif self.hit_streak >= 70 and self.hit_streak<80:
-             self.multiplier = 7
+            self.multiplier = 7
         elif self.hit_streak >= 80 and self.hit_streak<90:
-             self.multiplier = 8
+            self.multiplier = 8
         elif self.hit_streak >= 90 and self.hit_streak<100:
-             self.multiplier = 9
-        elif self.hit_streak >=100 and self.hit_streak<149:
-             self.multiplier=10
-        elif self.hit_streak >=150 and self.hit_streak<299:
-              self.multiplier=15
+            self.multiplier = 9
+        elif self.hit_streak >=100 and self.hit_streak<150:
+            self.multiplier=10
+        elif self.hit_streak >=150 and self.hit_streak<200:
+            self.multiplier=15
         elif self.hit_streak>=200 and self.hit_streak<250:
-             self.multiplier=20
+            self.multiplier=20
         elif self.hit_streak>=250 and self.hit_streak<300:
-              self.multiplier=25
+            self.multiplier=25
         elif self.hit_streak>=300:
-              self.multiplier=30
+            self.multiplier=30
 
         self.score += 10 * self.multiplier
         cloud=Cloud()
         cloudsprites.add(cloud)
         
-        monster.decrease_health(3+self.multiplier)
+        monster.decrease_health(2+(.5*self.multiplier))
 
 
         if note=="D":
