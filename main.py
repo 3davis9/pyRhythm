@@ -1,4 +1,9 @@
-#import cx_Freeze
+import pygame
+import os
+import sys
+import random
+from buttons import Button
+
 import pygame
 import os
 import sys
@@ -14,7 +19,7 @@ pygame.init()
 pygame.mixer.init()
 window = pygame.display.set_mode((winWidth, winHeight))
 # Set the caption
-pygame.display.set_caption("Rhythm Knight")
+pygame.display.set_caption("Rhythm Game")
 clock = pygame.time.Clock()
 
 #set common color
@@ -33,48 +38,6 @@ cloud_dir = os.path.join(graphics_dir, "cloud")
 ghost_dir = os.path.join(graphics_dir, "ghost")
 snd_dir = os.path.join(assets_dir, "music")
 font_dir = os.path.join(assets_dir, "fonts")
-
-
-
-def show_game_stats():
-    # Create a semi-transparent surface
-    transparent_surface = pygame.Surface((winWidth, winHeight), pygame.SRCALPHA)
-    transparent_surface.fill((0, 0, 0, 128))  # RGBA: black with 50% transparency
-
-    # Define font and color for the text
-    font_name = pygame.font.match_font('arial')
-    font = pygame.font.Font(font_name, 36)
-    text_color = WHITE
-    monster_dead = monster.dead
-   
-    # Display the game stats
-    stats = [
-        "Game Over",
-        "Your Score: {}".format(conductor.score),
-        "Longest Hit Streak: {}".format(conductor.longest_hit_streak),
-        "You Win! You killed the Monster!" if monster_dead else "You Lose! The Monster is still alive",
-        "Press esc key to exit"
-    ]
-
-    for index, line in enumerate(stats):
-        rendered_text = font.render(line, True, text_color)
-        text_rect = rendered_text.get_rect()
-        text_rect.center = ((winWidth // 2) - 70, winHeight // 2 + index * 50 - 70)
-        transparent_surface.blit(rendered_text, text_rect)
-
-    # Draw the transparent surface on top of the current screen
-    window.blit(transparent_surface, (0, 0))
-
-    # Update the display
-    pygame.display.flip()
-
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:  # Check for the ESC key
-                    gameExit()
-            if event.type == pygame.QUIT:
-                gameExit()
 
 def gameExit():
     pygame.quit()
@@ -193,12 +156,9 @@ class Conductor():
         self.padSkins = [padblue_img, padoran_img, padpurp_img, padyell_img]
         self.total_hits = 0
         self.correct_hits = 0
-        self.missedhits=0
         self.score = 0
         self.hit_streak = 0
         self.multiplier = 1
-        self.longest_hit_streak = 0
-       
         #interlude starts at 105
 
         self.notesD = [5,9,10.5,12,12.5,13,14.5,17,18.5,20,20.5,21,22.5,25,26.5,28,28.5,29,30.5,33,
@@ -228,7 +188,7 @@ class Conductor():
             ,199,199.5,200,206,208,215,215.5,216,218,218.5,220,222,224,226,228,230,232,232.5,233]
         self.notesShownK = []
         self.indexK=0
-        self.all_notes_played_time = 0
+
         self.padArray=[]
 
     def start(self):
@@ -340,29 +300,17 @@ class Conductor():
                 self.notesShownK.pop(0)
                 self.missHandler("K")
 
-        # Check if all the notes have been played, display monster animation,and wait for 5 seconds before quitting
-        if len(self.notesShownD) == 0 and len(self.notesShownF) == 0 and len(self.notesShownJ) == 0 and len(
-                 self.notesShownK) == 0:
-             if self.all_notes_played_time == 0:
-                 self.all_notes_played_time = pygame.time.get_ticks()
-            
-            #spawn the ghost before end screen
-             if(monster.dead and monster.ghostnotspawned):
-                ghost=Ghost()
-                ghostgroup.add(ghost)
-                monster.ghostnotspawned=False
-        
-             if pygame.time.get_ticks() - self.all_notes_played_time >= 3000:
-                 show_game_stats()
     
     #maybe a handle input method for each track
     def handleD(self, monster):
+        self.total_hits += 1
         #if there are notes present,
         if len(self.notesShownD)>0:
             #find how far note is from desired line
             offset= abs(self.notesShownD[0].rect.y - self.finishLine)
             #check if it is close enough
             if(offset<=self.hitOffset):
+                self.correct_hits += 1
                 self.hitHandler("D")
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownD.pop(0)
@@ -370,36 +318,42 @@ class Conductor():
 
 
     def handleF(self, monster):
+        self.total_hits += 1
         #if there are notes present,
         if len(self.notesShownF)>0:
             #find how far note is from desired line
             offset= abs(self.notesShownF[0].rect.y - self.finishLine)
             #check if it is close enough
             if(offset<=self.hitOffset):
+                self.correct_hits += 1
                 self.hitHandler("F")
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownF.pop(0)
                 toKill.kill()
 
     def handleJ(self, monster):
+        self.total_hits += 1
         #if there are notes present,
         if len(self.notesShownJ)>0:
             #find how far note is from desired line
             offset= abs(self.notesShownJ[0].rect.y - self.finishLine)
             #check if it is close enough
             if(offset<=self.hitOffset):
+                self.correct_hits += 1
                 self.hitHandler("J")
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownJ.pop(0)
                 toKill.kill()
 
     def handleK(self, monster):
+        self.total_hits += 1
         #if there are notes present,
         if len(self.notesShownK)>0:
             #find how far note is from desired line
             offset= abs(self.notesShownK[0].rect.y - self.finishLine)
             #check if it is close enough
             if(offset<=self.hitOffset):
+                self.correct_hits += 1
                 self.hitHandler("K")
                 #kill the sprite and remove it from the shown queue
                 toKill=self.notesShownK.pop(0)
@@ -407,16 +361,10 @@ class Conductor():
 
     #miss and hit handlers manage the animations missing and hitting notes
     def missHandler(self, note):
-        self.missedhits +=1
-        self.total_hits += 1
-        miss_ratio = self.missedhits / self.total_hits
-        monster.increase_health(20*miss_ratio)
-        if(self.longest_hit_streak < self.hit_streak):
-            self.longest_hit_streak = self.hit_streak
+        monster.increase_health(20)
         self.hit_streak = 0
-        #if self.score>0:
-        #    self.score -= 10
-
+        if self.score>0:
+            self.score -= 10
         if note=="D":
             #the positions of flashing borders and text depend on the array that holds the pads
             #access the positions of the pads using the array
@@ -442,42 +390,29 @@ class Conductor():
     
     def hitHandler(self, note):
         self.hit_streak += 1
-        self.correct_hits += 1
-        self.total_hits += 1
-        if self.hit_streak <20:
+        if self.hit_streak < 5:
             self.multiplier = 1
-        elif self.hit_streak >=20  and self.hit_streak <30:
+        elif self.hit_streak >= 5 and self.hit_streak <10:
             self.multiplier = 2
-        elif self.hit_streak >= 30 and self.hit_streak <40:
+
+        elif self.hit_streak >= 10 and self.hit_streak <15:
             self.multiplier = 3
-        elif self.hit_streak >= 40 and self.hit_streak <50:
+
+        elif self.hit_streak >= 15 and self.hit_streak <20:
             self.multiplier = 4
-        elif self.hit_streak >= 50 and self.hit_streak<60:
+
+        elif self.hit_streak >= 20:
             self.multiplier = 5
-        elif self.hit_streak >= 60 and self.hit_streak<70:
-            self.multiplier = 6
-        elif self.hit_streak >= 70 and self.hit_streak<80:
-            self.multiplier = 7
-        elif self.hit_streak >= 80 and self.hit_streak<90:
-            self.multiplier = 8
-        elif self.hit_streak >= 90 and self.hit_streak<100:
-            self.multiplier = 9
-        elif self.hit_streak >=100 and self.hit_streak<150:
-            self.multiplier=10
-        elif self.hit_streak >=150 and self.hit_streak<200:
-            self.multiplier=15
-        elif self.hit_streak>=200 and self.hit_streak<250:
-            self.multiplier=20
-        elif self.hit_streak>=250 and self.hit_streak<300:
-            self.multiplier=25
-        elif self.hit_streak>=300:
-            self.multiplier=30
 
         self.score += 10 * self.multiplier
         cloud=Cloud()
         cloudsprites.add(cloud)
-        
-        monster.decrease_health(2+(.5*self.multiplier))
+        # Calculate the correct_hits / total_hits ratio
+        hit_ratio = self.correct_hits / self.total_hits
+
+        # Check if the ratio is above 20%
+        if hit_ratio >= 0.2:
+            monster.decrease_health(3.6)
 
 
         if note=="D":
@@ -486,18 +421,21 @@ class Conductor():
             hitborder= padBorder(self.padArray[0].rect.x,self.padArray[0].rect.y,padhit_img)
             game_sprites.add(hitborder)
             self.padArray[0].flashSkin()
+            window.blit( cloud_img, (500, 500),)
         if note=="F":
             hit=movingtext(self.padArray[1].rect.x,hit_img)
             game_sprites.add(hit)
             hitborder= padBorder(self.padArray[1].rect.x,self.padArray[1].rect.y,padhit_img)
             game_sprites.add(hitborder)
             self.padArray[1].flashSkin()
+            window.blit( cloud_img2, (500, 50),)
         if note=="J":
             hit=movingtext(self.padArray[2].rect.x,hit_img)
             game_sprites.add(hit)
             hitborder= padBorder(self.padArray[2].rect.x,self.padArray[2].rect.y,padhit_img)
             game_sprites.add(hitborder)
             self.padArray[2].flashSkin()
+            window.blit( cloud_img3, (550,60),)
 
         if note=="K":
             hit=movingtext(self.padArray[3].rect.x,hit_img)
@@ -505,6 +443,7 @@ class Conductor():
             hitborder= padBorder(self.padArray[3].rect.x,self.padArray[3].rect.y,padhit_img)
             game_sprites.add(hitborder)
             self.padArray[3].flashSkin()
+            window.blit( cloud_img4, (700, 700),)
 
 class Knight(pygame.sprite.Sprite):
     def __init__(self):
@@ -539,8 +478,6 @@ class Monster(pygame.sprite.Sprite):
         self.max_health = 1000
         self.current_health = self.max_health
         self.dead = False
-        self.ghostnotspawned=True
-
 
     def update(self):
         self.index+=1
@@ -553,10 +490,7 @@ class Monster(pygame.sprite.Sprite):
                 self.index=len(self.images)-6
             self.image = self.images[self.index]
             self.image.set_colorkey(WHITE)
-        if self.current_health <10:
-            self.dead=True
-        if self.current_health>0:
-            self.dead=False
+            print(self.index)
         
     def draw_health_bar(self, surface):
         health_bar_width = 200
@@ -578,12 +512,16 @@ class Monster(pygame.sprite.Sprite):
         self.current_health -= amount
         if self.current_health < 0:
             self.current_health = 0
+        if self.current_health == 0:
+            ghost=Ghost()
+            ghostgroup.add(ghost)
+            self.dead=True
+            self.index= len(self.images)-6
 
     def increase_health(self, amount):
-        #if not self.dead:
-            self.current_health += amount
-            if self.current_health > self.max_health:
-                self.current_health = self.max_health
+        self.current_health += amount
+        if self.current_health > self.max_health:
+            self.current_health = self.max_health
 
 
 class Cloud(pygame.sprite.Sprite):
@@ -701,6 +639,7 @@ for i in reversed(range(3)):
      ghostSkins.append(pygame.image.load(os.path.join(ghost_dir, "ghost"+str(i+1)+".png")).convert_alpha())
 
 #loading music
+pygame.mixer.music.load(os.path.join(snd_dir,"music.wav"))
 pygame.mixer.music.set_volume(1)
 
 # create sprite groups
@@ -710,6 +649,9 @@ knightgroup= pygame.sprite.Group()
 monstergroup=pygame.sprite.Group()
 cloudsprites = pygame.sprite.Group()
 ghostgroup= pygame.sprite.Group()
+
+# play background music
+pygame.mixer.music.play(loops=-1)
 
 #create conductor
 conductor = Conductor()
@@ -771,7 +713,6 @@ while running:
         conductorStarted=True
     else:
         conductor.update()
-
     game_sprites.update()
     note_sprites.update()
     cloudsprites.update()
@@ -782,17 +723,20 @@ while running:
     window.blit(bg_img, bg_rect)
     window.blit(sword_img, (10,40))
 
-    textRender(window, "SCORE: " + str(conductor.score)+" x" + str(conductor.multiplier), 40, 300, 40)
+    textRender(window, "Score: " + str(conductor.score), 40, 250, 40)
 
-    if (conductor.hit_streak >=30):
-        textRender(window, "STREAK: " + str(conductor.hit_streak),random.randint(40,43), 650, 40)
-    elif(conductor.hit_streak>=50):
-        textRender(window, "STREAK: " + str(conductor.hit_streak),random.randint(50,60), 650, 40)
-    elif(conductor.hit_streak>=100):
-        textRender(window, "STREAK: " + str(conductor.hit_streak),random.randint(90,120), 650, 40)
- 
-    else:
-        textRender(window, "STREAK: " + str(conductor.hit_streak),40, 650, 40)
+   # for i in range(3):
+   # new_x = random.randrange(0, display_width)
+   # new_y = random.randrange(0, display_height)
+   # met = Meteor(new_x, new_y)
+   # rotation = random.randint(0, 359) # Some line here to pick a random rotation
+   # size = random.randint(1, 3)       # some line here to pick a random scale
+   # met.pic = pygame.transform.rotozoom(met.pic, rotation, size)  # How do I put this in
+   # all_meteors.add(met)    #this only allows x and y
+    textRender(window, "Hit Streak: " + str(conductor.hit_streak),40, 550, 40)
+
+    textRender(window, "Multiplier: " + str(conductor.multiplier), 40, 850, 40)
+   
 
     #prints beats in time
     #timeSinceLastAction= timeSinceLastAction + timesincelasttick
@@ -830,4 +774,3 @@ while running:
 
     #updates all screen w/ no parameter
     pygame.display.update()
-
